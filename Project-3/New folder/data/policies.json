@@ -1,0 +1,180 @@
+[
+  {
+    "id": "pol_electronics_001",
+    "category": "electronics",
+    "title": "Electronics Return & Refund Policy",
+    "icon": "💻",
+    "sections": [
+      {
+        "id": "elec_001",
+        "heading": "Return Window",
+        "content": "Electronics purchased from our store may be returned within 30 days of the original purchase date. Items must be in their original, unused condition with all original packaging, accessories, manuals, and warranty cards included. Opened software, digital downloads, and activated gift cards are non-returnable."
+      },
+      {
+        "id": "elec_002",
+        "heading": "Damaged or Defective Items",
+        "content": "If your electronic item arrives damaged or is defective within the first 30 days, we will replace it at no charge or issue a full refund. After 30 days but within the manufacturer warranty period, defective items must be handled directly through the manufacturer's warranty service. We do not accept returns for items damaged due to misuse, accidents, or unauthorized modifications."
+      },
+      {
+        "id": "elec_003",
+        "heading": "Refund Processing",
+        "content": "Approved refunds for electronics are processed within 5–7 business days. Refunds are issued to the original payment method. Credit card refunds may take an additional 3–5 business days to appear on your statement depending on your bank. Store credit refunds are available immediately upon approval."
+      },
+      {
+        "id": "elec_004",
+        "heading": "Non-Returnable Electronics",
+        "content": "The following electronics are non-returnable: items with broken seals on software packaging, prepaid cards, SIM cards, and any product explicitly marked as 'Final Sale' at the time of purchase. Laptops and desktop computers that have been custom-configured to order are also non-returnable unless defective."
+      },
+      {
+        "id": "elec_005",
+        "heading": "Trade-In Policy",
+        "content": "Electronics eligible for trade-in must be fully functional, free of cracked screens, and not be reported as lost or stolen. Trade-in values are assessed at the time of evaluation and may differ from the initial estimate if the device condition does not match what was described. Trade-in credit cannot be combined with other promotional discounts."
+      }
+    ]
+  },
+  {
+    "id": "pol_clothing_001",
+    "category": "clothing",
+    "title": "Clothing & Apparel Return Policy",
+    "icon": "👕",
+    "sections": [
+      {
+        "id": "cloth_001",
+        "heading": "Return Window",
+        "content": "Clothing and apparel items may be returned within 60 days of purchase. Items must be unworn, unwashed, and in their original condition with all tags attached. Items showing signs of wear, deodorant, perfume, or alterations will not be accepted for return."
+      },
+      {
+        "id": "cloth_002",
+        "heading": "Sale and Clearance Items",
+        "content": "Items purchased during a sale or clearance event may be returned within 14 days for store credit only. Final Sale items, which are marked clearly at checkout and on the product page, are not eligible for return or exchange under any circumstances."
+      },
+      {
+        "id": "cloth_003",
+        "heading": "Swimwear and Intimates",
+        "content": "For hygiene reasons, swimwear and intimate apparel (including underwear, bras, and shapewear) may only be returned if they are in new, unworn condition with the original hygienic liner still attached. Any item without the hygienic liner will be automatically refused at the return counter."
+      },
+      {
+        "id": "cloth_004",
+        "heading": "Exchange Process",
+        "content": "Exchanges for a different size or color are accepted within 60 days. If the desired item is unavailable, you may choose an alternative item of equal or lesser value, or receive store credit for the difference. Exchanges for higher-priced items require payment of the price difference at time of exchange."
+      },
+      {
+        "id": "cloth_005",
+        "heading": "Online Purchase Returns",
+        "content": "Clothing purchased online can be returned by mail or in-store. For mail returns, a prepaid return shipping label is provided for the first return per order. Subsequent returns from the same order require the customer to cover return shipping costs. In-store returns for online purchases are processed immediately with ID verification."
+      }
+    ]
+  },
+  {
+    "id": "pol_furniture_001",
+    "category": "furniture",
+    "title": "Furniture & Home Decor Return Policy",
+    "icon": "🪑",
+    "sections": [
+      {
+        "id": "furn_001",
+        "heading": "Return Eligibility",
+        "content": "Furniture items may be returned within 30 days of delivery in their original, unassembled condition. Once assembled, furniture is not eligible for return unless it is structurally defective. All original packaging must be retained for returns. We reserve the right to charge a 15% restocking fee for furniture returns that are not due to defects."
+      },
+      {
+        "id": "furn_002",
+        "heading": "Custom and Made-to-Order Furniture",
+        "content": "Custom furniture, made-to-order pieces, and any items with custom dimensions or finishes are non-returnable and non-refundable once the order is confirmed. Cancellations of custom orders must be made within 24 hours of placement to receive a full refund. After 24 hours, a 50% cancellation fee applies."
+      },
+      {
+        "id": "furn_003",
+        "heading": "Delivery Damage",
+        "content": "Inspect all furniture items upon delivery before signing the delivery receipt. If you notice any damage, note it on the delivery receipt and contact our customer service within 48 hours with photographic evidence. Items damaged during delivery are replaced at no cost. Damage reported after 48 hours of delivery may not qualify for a free replacement."
+      },
+      {
+        "id": "furn_004",
+        "heading": "Return Pickup",
+        "content": "For large furniture returns, we offer a pickup service scheduled within 7–10 business days of return approval. The item must be disassembled and placed in its original packaging before pickup. A pickup fee of $49 applies to returns that are not due to damage or manufacturing defects."
+      }
+    ]
+  },
+  {
+    "id": "pol_grocery_001",
+    "category": "grocery",
+    "title": "Grocery & Perishables Return Policy",
+    "icon": "🛒",
+    "sections": [
+      {
+        "id": "groc_001",
+        "heading": "Perishable Items",
+        "content": "Perishable grocery items, including fresh produce, meat, dairy, and bakery products, may be returned or exchanged within 24 hours of purchase if they are found to be spoiled, expired, or of unsatisfactory quality. Proof of purchase is required. We do not accept returns on perishable items for reasons of personal preference or change of mind."
+      },
+      {
+        "id": "groc_002",
+        "heading": "Non-Perishable Groceries",
+        "content": "Non-perishable grocery items (canned goods, dry goods, packaged snacks) may be returned within 7 days of purchase if they are unopened and in original condition. Items that have been opened cannot be returned unless they contain a foreign object or are clearly defective in a way that poses a safety concern."
+      },
+      {
+        "id": "groc_003",
+        "heading": "Alcohol Policy",
+        "content": "Alcohol purchases are non-refundable unless the product is defective (e.g., contaminated, corked wine, or off-tasting spirits). In such cases, the original bottle with remaining contents must be returned for evaluation. Refunds for defective alcohol are issued as store credit only, not to the original payment method."
+      },
+      {
+        "id": "groc_004",
+        "heading": "Online Grocery Delivery",
+        "content": "For online grocery deliveries, report any missing, damaged, or incorrect items within 2 hours of delivery through our app or website. Eligible refunds for online grocery orders are applied as account credit within 1 business day. We do not require the return of items for online grocery refund claims under $25."
+      }
+    ]
+  },
+  {
+    "id": "pol_toys_001",
+    "category": "toys",
+    "title": "Toys & Games Return Policy",
+    "icon": "🎮",
+    "sections": [
+      {
+        "id": "toys_001",
+        "heading": "Standard Return Window",
+        "content": "Toys and games may be returned within 45 days of purchase. Items must be in new, unused condition in the original packaging. Opened board games are returnable only if all pieces are present and the game is in resalable condition. We recommend keeping original packaging until you are certain you will keep the item."
+      },
+      {
+        "id": "toys_002",
+        "heading": "Video Games and Software",
+        "content": "Unopened video games may be returned within 45 days. Opened video games may only be exchanged for the same title if the disc is defective. Digital game codes and downloadable content (DLC) are non-returnable once the code has been revealed or redeemed. Gaming consoles follow the electronics return policy."
+      },
+      {
+        "id": "toys_003",
+        "heading": "Safety Recalls",
+        "content": "If a toy or game is subject to a safety recall, we will accept the return at any time regardless of the original purchase date. No receipt is required for recalled items; however, we may require a photo ID. Refunds for recalled items are issued at the current retail price or original purchase price, whichever is higher."
+      },
+      {
+        "id": "toys_004",
+        "heading": "Holiday Return Extension",
+        "content": "Toys and games purchased between November 1 and December 31 are eligible for an extended return window until January 31 of the following year. This holiday extension applies to standard items only and does not override the restrictions on opened software, digital codes, or final sale items."
+      }
+    ]
+  },
+  {
+    "id": "pol_sports_001",
+    "category": "sports",
+    "title": "Sports & Outdoor Equipment Return Policy",
+    "icon": "⚽",
+    "sections": [
+      {
+        "id": "sport_001",
+        "heading": "Return Window",
+        "content": "Sports and outdoor equipment may be returned within 30 days of purchase in new, unused condition with all tags and accessories. Equipment that has been used outdoors or shows signs of use (dirt, scratches, wear) is not eligible for return. We recommend testing equipment in an indoor setting before outdoor use if you are unsure about the purchase."
+      },
+      {
+        "id": "sport_002",
+        "heading": "Bicycles and Large Equipment",
+        "content": "Bicycles and large sports equipment such as treadmills, weight benches, and kayaks must be returned within 15 days of purchase or delivery. These items must be returned in original packaging if purchased online. In-store purchases of bicycles must be returned before any significant modifications or adjustments are made by the customer."
+      },
+      {
+        "id": "sport_003",
+        "heading": "Footwear",
+        "content": "Sports footwear may be returned within 30 days if unworn outdoors. Shoes worn only on indoor surfaces (carpet or hardwood) for fit testing may be returned. Shoes with visible outdoor wear on the soles will be refused. For footwear comfort or fit issues, we offer one free size exchange per purchase."
+      },
+      {
+        "id": "sport_004",
+        "heading": "Rental Equipment",
+        "content": "Rental sports equipment must be returned by the agreed return date and time. Late returns are charged at the daily rental rate for each additional day. Damage to rental equipment beyond normal wear and tear will be assessed and charged to the credit card on file. Rental fees are non-refundable once equipment has been dispatched."
+      }
+    ]
+  }
+]
