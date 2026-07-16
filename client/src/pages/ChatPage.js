@@ -5,17 +5,32 @@ import ChatMessage from '../components/ChatMessage';
 import ChatInput from '../components/ChatInput';
 import TypingIndicator from '../components/TypingIndicator';
 import UploadModal from '../components/UploadModal';
+import LoginModal from '../components/LoginModal';
+import RegisterAdminModal from '../components/RegisterAdminModal';
 import { useChat } from '../hooks/useChat';
+import { verifyToken, logout } from '../services/api';
 
 export default function ChatPage() {
   const { messages, isLoading, sendMessage, clearChat } = useChat();
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showRegisterAdmin, setShowRegisterAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminRole, setAdminRole] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
   const [suggestedQuery, setSuggestedQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const messagesEndRef = useRef(null);
   const [uploadKey, setUploadKey] = useState(0);
+
+  // Check authentication status on startup and key updates
+  useEffect(() => {
+    verifyToken().then(({ valid, role }) => {
+      setIsAdmin(valid);
+      setAdminRole(role);
+    });
+  }, [uploadKey]);
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -61,6 +76,17 @@ export default function ChatPage() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    setIsAdmin(false);
+    setUploadKey((k) => k + 1);
+  };
+
+  const handleLoginSuccess = () => {
+    setIsAdmin(true);
+    setUploadKey((k) => k + 1);
+  };
+
   return (
     <div className="app-layout">
       {/* Sidebar */}
@@ -72,6 +98,11 @@ export default function ChatPage() {
           onUploadClick={handleUploadClick}
           onSuggestedQuery={handleSuggestedQuery}
           onEditPolicy={handleEditPolicy}
+          isAdmin={isAdmin}
+          adminRole={adminRole}
+          onLoginClick={() => setShowLogin(true)}
+          onLogout={handleLogout}
+          onAddAdminClick={() => setShowRegisterAdmin(true)}
         />
       </div>
 
@@ -123,6 +154,23 @@ export default function ChatPage() {
           onClose={() => setShowUpload(false)}
           onSuccess={handleUploadSuccess}
           editingCategory={editingCategory}
+        />
+      )}
+
+      {/* Login Modal */}
+      {showLogin && (
+        <LoginModal
+          isOpen={showLogin}
+          onClose={() => setShowLogin(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      )}
+
+      {/* Register Admin Modal */}
+      {showRegisterAdmin && (
+        <RegisterAdminModal
+          isOpen={showRegisterAdmin}
+          onClose={() => setShowRegisterAdmin(false)}
         />
       )}
     </div>

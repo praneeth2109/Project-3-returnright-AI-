@@ -17,6 +17,11 @@ export default function Sidebar({
   onSuggestedQuery,
   onDeletePolicy,
   onEditPolicy,
+  isAdmin,
+  adminRole,
+  onLoginClick,
+  onLogout,
+  onAddAdminClick,
 }) {
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +52,7 @@ export default function Sidebar({
     setDeleting(cat);
     try {
       await deletePolicyByCategory(cat);
-      setCategories((prev) => prev.filter((c) => c !== cat));
+      setPolicies((prev) => prev.filter((p) => p.category !== cat));
       if (selectedCategory === cat) onSelectCategory(null);
       if (onDeletePolicy) onDeletePolicy(cat);
     } catch (err) {
@@ -91,34 +96,37 @@ export default function Sidebar({
                 <span className="cat-icon">{policy.icon || '📄'}</span>
                 <span className="cat-name">{cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
                 {selectedCategory === cat && <span className="active-dot" />}
-                <div className="cat-actions">
-                  <span
-                    className="cat-edit-btn"
-                    title={`Edit ${cat} policy`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onEditPolicy) onEditPolicy(cat);
-                    }}
-                  >
-                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </span>
-                  <span
-                    className={`cat-delete-btn ${deleting === cat ? 'deleting' : ''}`}
-                    title={`Delete ${cat} policy`}
-                    onClick={(e) => handleDelete(e, cat)}
-                  >
-                    {deleting === cat ? (
-                      <span className="cat-delete-spinner" />
-                    ) : (
+                
+                {isAdmin && (
+                  <div className="cat-actions">
+                    <span
+                      className="cat-edit-btn"
+                      title={`Edit ${cat} policy`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onEditPolicy) onEditPolicy(cat);
+                      }}
+                    >
                       <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                    )}
-                  </span>
-                </div>
+                    </span>
+                    <span
+                      className={`cat-delete-btn ${deleting === cat ? 'deleting' : ''}`}
+                      title={`Delete ${cat} policy`}
+                      onClick={(e) => handleDelete(e, cat)}
+                    >
+                      {deleting === cat ? (
+                        <span className="cat-delete-spinner" />
+                      ) : (
+                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </span>
+                  </div>
+                )}
               </button>
             );
           })
@@ -139,14 +147,38 @@ export default function Sidebar({
       )}
 
       <div className="sidebar-footer">
-        <button className="upload-btn" onClick={onUploadClick}>
-          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Upload Policy
-        </button>
+        {isAdmin ? (
+          <>
+            <button className="upload-btn" onClick={onUploadClick}>
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Upload Policy
+            </button>
+            {adminRole === 'super-admin' && (
+              <button 
+                className="upload-btn" 
+                onClick={onAddAdminClick} 
+                style={{ marginTop: '8px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--accent)', borderColor: 'rgba(99, 102, 241, 0.3)' }}
+              >
+                ➕ Add Admin
+              </button>
+            )}
+            <button 
+              className="upload-btn logout-btn" 
+              onClick={onLogout}
+              style={{ marginTop: '8px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+            >
+              🔒 Log Out
+            </button>
+          </>
+        ) : (
+          <button className="upload-btn login-btn" onClick={onLoginClick}>
+            🔑 Admin Login
+          </button>
+        )}
         <div className="sidebar-meta">
-          <span>Powered by TF-IDF Retrieval</span>
+          <span>Powered by Semantic Vector Search</span>
         </div>
       </div>
     </aside>

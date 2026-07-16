@@ -43,8 +43,10 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 
 // Routes
+const authRoutes = require('./routes/auth');
 app.use('/api/policies', policyRoutes);
 app.use('/api/query', queryRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -56,10 +58,31 @@ mongoose
   .connect(MONGO_URI)
   .then(async () => {
     console.log('✅ Connected to MongoDB');
+    
     // Seed the database with sample policies on first run
     await seedDatabase();
+    
+    // Bootstrap default super-admin account if no admins exist
+    const Admin = require('./models/Admin');
+    const { hashPassword } = require('./utils/auth');
+    try {
+      const adminCount = await Admin.countDocuments();
+      if (adminCount === 0) {
+        const defaultAdmin = new Admin({
+          username: 'admin',
+          password: hashPassword('admin'),
+          role: 'super-admin'
+        });
+        await defaultAdmin.save();
+        console.log('🛡️ Bootstrapped default Super Admin (admin/admin)');
+      }
+    } catch (bootstrapErr) {
+      console.error('❌ Default admin bootstrap failed:', bootstrapErr.message);
+    }
+
     // Run embeddings migration to populate vector data
     await migrateEmbeddings();
+    
     app.listen(PORT, () => {
       console.log(`🚀 ReturnRight AI server running on http://localhost:${PORT}`);
     });

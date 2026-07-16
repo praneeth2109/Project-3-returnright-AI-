@@ -11,6 +11,62 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+// Helper to set authorization token in header
+export function setAuthToken(token) {
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common['Authorization'];
+  }
+}
+
+// Auto-initialize token from localStorage if present
+const storedToken = localStorage.getItem('adminToken');
+if (storedToken) {
+  setAuthToken(storedToken);
+}
+
+/**
+ * Log in admin.
+ */
+export async function login(username, password) {
+  const { data } = await api.post('/auth/login', { username, password });
+  if (data.token) {
+    localStorage.setItem('adminToken', data.token);
+    setAuthToken(data.token);
+  }
+  return data;
+}
+
+/**
+ * Log out admin.
+ */
+export function logout() {
+  localStorage.removeItem('adminToken');
+  setAuthToken(null);
+}
+
+/**
+ * Verify token.
+ */
+export async function verifyToken() {
+  try {
+    const { data } = await api.get('/auth/verify');
+    return { valid: data.valid, role: data.user?.role || 'admin' };
+  } catch (err) {
+    logout();
+    return { valid: false, role: null };
+  }
+}
+
+/**
+ * Register a new administrator.
+ */
+export async function registerAdmin(username, password, role = 'admin') {
+  const { data } = await api.post('/auth/register', { username, password, role });
+  return data;
+}
+
 /**
  * Send a query to the retrieval engine.
  * @param {string} question - Natural language question
