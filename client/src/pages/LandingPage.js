@@ -8,8 +8,9 @@ export default function LandingPage({ onGetStarted }) {
   const [mockScore, setMockScore] = useState(0);
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
+  const containerRef = useRef(null);
 
-  // Status cards for Stage 'control'
+  // Status cards for Stage 'control' (Smoked glassmorphism)
   const glassCards = [
     { text: '✓ Return Eligible', delay: 0 },
     { text: '✓ Refund Available', delay: 200 },
@@ -21,10 +22,10 @@ export default function LandingPage({ onGetStarted }) {
 
   // Documents/legal text terms for Stage 'problem'
   const problemDocuments = [
-    { brand: 'Amazon Return Policy', text: 'All return requests must be submitted within the established window. Items returned without authorization will be subject to a restocking fee of up to 20%...', delay: 0, x: 15, y: 20, z: -800 },
-    { brand: 'Nike Store Terms', text: 'Products must be returned unworn and unwashed with original tags attached. Final sale and custom configurations are strictly non-refundable under any conditions...', delay: 100, x: 75, y: 15, z: -600 },
-    { brand: 'Apple Policy Details', text: 'Hardware returns are subject to a 14-day window. Opened software, custom-configured Macs, and activated subscriptions are strictly final sale...', delay: 200, x: 20, y: 70, z: -400 },
-    { brand: 'Adidas Returns', text: 'Items must be returned in their original packaging. Returns that do not satisfy our strict quality inspection will be rejected and sent back...', delay: 300, x: 80, y: 70, z: -200 },
+    { brand: 'Amazon Return Policy', text: 'All return requests must be submitted within the established window. Items returned without authorization will be subject to a restocking fee of up to 20%...', delay: 0, x: 15, y: 22, z: -800 },
+    { brand: 'Nike Store Terms', text: 'Products must be returned unworn and unwashed with original tags attached. Final sale and custom configurations are strictly non-refundable under any conditions...', delay: 100, x: 70, y: 18, z: -600 },
+    { brand: 'Apple Policy Details', text: 'Hardware returns are subject to a 14-day window. Opened software, custom-configured Macs, and activated subscriptions are strictly final sale...', delay: 200, x: 25, y: 68, z: -400 },
+    { brand: 'Adidas Returns', text: 'Items must be returned in their original packaging. Returns that do not satisfy our strict quality inspection will be rejected and sent back...', delay: 300, x: 75, y: 65, z: -200 },
   ];
 
   const glowingWords = [
@@ -43,41 +44,40 @@ export default function LandingPage({ onGetStarted }) {
       setStage('awakens');
     }, 2000);
 
-    // Stage 3: Human Problem (4s)
+    // Stage 3: Human Problem (4.5s)
     const problemTimer = setTimeout(() => {
       setStage('problem');
-    }, 4000);
+    }, 4500);
 
-    // Stage 4: AI Takes Control (7s)
+    // Stage 4: AI Takes Control (7.5s)
     const controlTimer = setTimeout(() => {
       setStage('control');
-      // Reveal glass cards
       glassCards.forEach((_, idx) => {
         setTimeout(() => {
           setActiveCardIndex(idx);
         }, 400 + idx * 250);
       });
-    }, 7000);
+    }, 7500);
 
-    // Stage 5: Logo Reveal (10s)
+    // Stage 5: Logo Reveal (10.5s)
     const logoTimer = setTimeout(() => {
       setStage('logo');
-    }, 10000);
+    }, 10500);
 
-    // Stage 6: Title (12s)
+    // Stage 6: Title (13s)
     const titleTimer = setTimeout(() => {
       setStage('title');
-    }, 12000);
+    }, 13000);
 
-    // Stage 7: Transition (14s)
+    // Stage 7: Transition (15s)
     const transitionTimer = setTimeout(() => {
       setStage('transition');
-    }, 14000);
+    }, 15000);
 
-    // Stage 8: Landing Page Live (15.5s)
+    // Stage 8: Landing Page Live (16.5s)
     const landingTimer = setTimeout(() => {
       setStage('landing');
-    }, 15500);
+    }, 16500);
 
     return () => {
       clearTimeout(awakensTimer);
@@ -110,7 +110,7 @@ export default function LandingPage({ onGetStarted }) {
     setStage('landing');
   };
 
-  // Canvas particle timeline engine
+  // Canvas particle PBR-simulation timeline engine
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -127,38 +127,67 @@ export default function LandingPage({ onGetStarted }) {
     const h = canvas.height;
     const centerX = w / 2;
     const centerY = h / 2;
+    const floorY = h * 0.72; // Reflections Floor Division line
 
-    // Generate Shield targets for Stage 'logo'
-    const targets = [];
-    for (let i = 0; i < 120; i++) {
-      const t = (i / 120) * Math.PI * 2;
-      const x = centerX + 110 * Math.sin(t) * (1.25 - 0.25 * Math.cos(t));
-      const y = centerY + 110 * Math.cos(t) + 30 * Math.abs(Math.sin(t)) - 25;
-      targets.push({ x, y, color: '#2563EB' });
-    }
-    // Generate Inner box targets
-    for (let i = 0; i < 40; i++) {
-      const progress = i / 40;
-      targets.push({ x: centerX - 35 + progress * 70, y: centerY - 25 + (progress < 0.5 ? progress * 30 : (1 - progress) * 30), color: '#06B6D4' });
-      targets.push({ x: centerX - 35, y: centerY - 10 + progress * 50, color: '#3b82f6' });
-      targets.push({ x: centerX + 35, y: centerY - 10 + progress * 50, color: '#10B981' });
+    // Initialize 100 volumetric dust particles catching light
+    const dustParticles = [];
+    for (let i = 0; i < 100; i++) {
+      dustParticles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: (Math.random() - 0.5) * 0.15,
+        size: Math.random() * 1.5 + 0.3,
+        alpha: Math.random() * 0.3 + 0.05,
+      });
     }
 
-    // Initialize 600 particles
+    // Initialize sparks container
+    let sparks = [];
+
+    // Initialize metal logo fragments for magnetic construction
+    const fragments = [];
+    const fragmentTargets = [
+      // Bounding shield segments
+      { x: centerX - 60, y: centerY - 40, rx: -30, ry: -20, delay: 0 },
+      { x: centerX + 60, y: centerY - 40, rx: 30, ry: -20, delay: 100 },
+      { x: centerX, y: centerY + 70, rx: 0, ry: 40, delay: 200 },
+      // Inner package panels
+      { x: centerX, y: centerY - 15, rx: 0, ry: -15, delay: 300 },
+      { x: centerX - 30, y: centerY + 15, rx: -25, ry: 15, delay: 400 },
+      { x: centerX + 30, y: centerY + 15, rx: 25, ry: 15, delay: 500 },
+    ];
+
+    fragmentTargets.forEach((t) => {
+      fragments.push({
+        x: centerX + (Math.random() - 0.5) * w * 0.6,
+        y: centerY + (Math.random() - 0.5) * h * 0.6 - 150,
+        tx: t.x,
+        ty: t.y,
+        rx: t.rx,
+        ry: t.ry,
+        size: Math.random() * 15 + 10,
+        angle: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.08,
+        delay: t.delay,
+        locked: false,
+      });
+    });
+
+    // 600 micro neural/dust particles
     const particles = [];
     for (let i = 0; i < 600; i++) {
       particles.push({
-        x: w / 2 + (Math.random() - 0.5) * 10,
-        y: h / 2 + (Math.random() - 0.5) * 10,
-        vx: (Math.random() - 0.5) * 0.2,
-        vy: (Math.random() - 0.5) * 0.2,
-        radius: Math.random() * 1.6 + 0.5,
+        x: w / 2 + (Math.random() - 0.5) * 15,
+        y: h / 2 + (Math.random() - 0.5) * 15,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        radius: Math.random() * 1.5 + 0.4,
         color: '#2563EB',
-        alpha: Math.random() * 0.8 + 0.2,
-        trail: [],
+        alpha: Math.random() * 0.7 + 0.2,
         angle: Math.random() * Math.PI * 2,
-        distance: Math.random() * 200 + 50,
-        speed: Math.random() * 0.02 + 0.005,
+        distance: Math.random() * 180 + 30,
+        speed: Math.random() * 0.012 + 0.003,
       });
     }
 
@@ -168,99 +197,151 @@ export default function LandingPage({ onGetStarted }) {
 
     const render = () => {
       time += 0.016;
-      
-      // Stage darkness has complete black backdrop. Later stages use light trail alpha.
-      if (stage === 'darkness') {
-        ctx.fillStyle = '#050816';
-        ctx.fillRect(0, 0, w, h);
-      } else {
-        ctx.fillStyle = 'rgba(5, 8, 22, 0.16)';
-        ctx.fillRect(0, 0, w, h);
-      }
 
-      // ── STAGE 1: DARKNESS (Pulsing Single Particle) ──
-      if (stage === 'darkness') {
-        const pulse = 4 + Math.sin(time * 6) * 1.8;
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = '#2563EB';
-        ctx.fillStyle = '#3B82F6';
+      // ── RENDER BASE ATMOSPHERE (PBR Polished Dark Glass Floor) ──
+      // Air (Top half)
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, floorY);
+      skyGrad.addColorStop(0, '#030712');
+      skyGrad.addColorStop(1, '#050a1c');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, w, floorY);
+
+      // Floor (Bottom half - polished reflecting glass)
+      const floorGrad = ctx.createLinearGradient(0, floorY, 0, h);
+      floorGrad.addColorStop(0, '#040714');
+      floorGrad.addColorStop(1, '#020308');
+      ctx.fillStyle = floorGrad;
+      ctx.fillRect(0, floorY, w, h - floorY);
+
+      // Volumetric Light Beams drifting overhead
+      const lightGrad = ctx.createRadialGradient(centerX + Math.sin(time * 0.5) * 200, centerY - 200, 50, centerX + Math.sin(time * 0.5) * 200, centerY - 200, 600);
+      lightGrad.addColorStop(0, 'rgba(37, 99, 235, 0.05)');
+      lightGrad.addColorStop(0.5, 'rgba(6, 182, 212, 0.02)');
+      lightGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = lightGrad;
+      ctx.fillRect(0, 0, w, floorY);
+
+      // ── DRAW VOLUMETRIC FLOATING DUST PARTICLES ──
+      dustParticles.forEach((d) => {
+        d.x += d.vx;
+        d.y += d.vy;
+        if (d.x < 0 || d.x > w) d.vx *= -1;
+        if (d.y < 0 || d.y > floorY) d.vy *= -1;
+
+        // Pulse alpha based on volumetric light alignment
+        const intensity = Math.sin(time + d.x * 0.01) * 0.5 + 0.5;
+        ctx.fillStyle = `rgba(255, 255, 255, ${d.alpha * intensity})`;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, pulse, 0, Math.PI * 2);
+        ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.shadowBlur = 0; // Reset
-      }
+      });
 
-      // ── STAGE 2: AI AWAKENS (Neural network grows) ──
-      if (stage === 'awakens') {
-        // Particles drift outward into orbit positions
-        particles.forEach((p, idx) => {
-          p.x = centerX + Math.cos(p.angle) * p.distance;
-          p.y = centerY + Math.sin(p.angle) * p.distance;
-          p.distance += (p.distance < 300 ? 1.5 : 0.2);
-          p.angle += p.speed;
-
-          // Drawing neural lines between close nodes
-          for (let j = idx + 1; j < idx + 6; j++) {
-            const other = particles[j % particles.length];
-            const d = Math.hypot(p.x - other.x, p.y - other.y);
-            if (d < 120) {
-              ctx.strokeStyle = `rgba(37, 99, 235, ${0.1 * (1 - d / 120)})`;
-              ctx.lineWidth = 0.5;
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(other.x, other.y);
-              ctx.stroke();
-            }
-          }
-
-          // Draw node
-          ctx.fillStyle = '#2563EB';
+      // ── STAGE 1: PULSING HEARTBEAT PARTICLE ──
+      if (stage === 'darkness') {
+        const pulse = 4.5 + Math.sin(time * 7) * 1.6;
+        
+        const drawSingle = (yPos, alphaVal, sizeMod) => {
+          ctx.save();
+          ctx.globalAlpha = alphaVal;
+          ctx.shadowBlur = 24 * sizeMod;
+          ctx.shadowColor = '#2563EB';
+          ctx.fillStyle = '#3B82F6';
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.arc(centerX, yPos, pulse * sizeMod, 0, Math.PI * 2);
           ctx.fill();
-        });
+          ctx.restore();
+        };
+
+        // Real
+        drawSingle(centerY - 50, 1.0, 1.0);
+        // Reflection
+        drawSingle(floorY + (floorY - (centerY - 50)), 0.3, 0.95);
       }
 
-      // ── STAGE 3: HUMAN PROBLEM (Particles fly past like stars) ──
+      // ── STAGE 2: AI AWAKENS (Neural pathway growth) ──
+      if (stage === 'awakens') {
+        const drawNetwork = (yOffset, scaleFactor, alphaFactor) => {
+          ctx.save();
+          ctx.globalAlpha = alphaFactor;
+          
+          particles.forEach((p, idx) => {
+            const px = centerX + Math.cos(p.angle) * p.distance * scaleFactor;
+            const py = yOffset + Math.sin(p.angle) * p.distance * scaleFactor * (yOffset > floorY ? -1 : 1);
+            p.distance += 1.2;
+            p.angle += p.speed;
+
+            // Connect lines
+            for (let j = idx + 1; j < idx + 5; j++) {
+              const other = particles[j % particles.length];
+              const ox = centerX + Math.cos(other.angle) * other.distance * scaleFactor;
+              const oy = yOffset + Math.sin(other.angle) * other.distance * scaleFactor * (yOffset > floorY ? -1 : 1);
+              const d = Math.hypot(px - ox, py - oy);
+              if (d < 110) {
+                ctx.strokeStyle = `rgba(37, 99, 235, ${0.08 * (1 - d / 110)})`;
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(px, py);
+                ctx.lineTo(ox, oy);
+                ctx.stroke();
+              }
+            }
+
+            ctx.fillStyle = '#2563EB';
+            ctx.beginPath();
+            ctx.arc(px, py, p.radius * scaleFactor, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          ctx.restore();
+        };
+
+        // Draw Real
+        drawNetwork(centerY - 50, 1.0, 1.0);
+        // Draw Reflection
+        drawNetwork(floorY + (floorY - (centerY - 50)), 0.28, 0.28);
+      }
+
+      // ── STAGE 3: HUMAN PROBLEM (Dust trails) ──
       if (stage === 'problem') {
         particles.forEach((p) => {
-          // Rapid starfield movement
-          p.x += Math.cos(p.angle) * 8;
-          p.y += Math.sin(p.angle) * 8;
-
-          // Wrap around screen
-          if (p.x < 0 || p.x > w || p.y < 0 || p.y > h) {
+          p.x += Math.cos(p.angle) * 7;
+          p.y += Math.sin(p.angle) * 7;
+          if (p.x < 0 || p.x > w || p.y < 0 || p.y > floorY) {
             p.x = centerX + (Math.random() - 0.5) * 100;
             p.y = centerY + (Math.random() - 0.5) * 100;
             p.angle = Math.random() * Math.PI * 2;
           }
 
-          ctx.fillStyle = '#10B981';
+          ctx.fillStyle = 'rgba(16, 185, 129, 0.4)';
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, p.radius * 1.2, 0, Math.PI * 2);
           ctx.fill();
         });
       }
 
-      // ── STAGE 4: AI TAKES CONTROL (Shockwave & Freeze) ──
+      // ── STAGE 4: SHOCKWAVE & BLANKET REFLECTION ──
       if (stage === 'control') {
-        // Shockwave expansion
         if (shockwaveRadius < w) {
-          shockwaveRadius += 16;
-          shockwaveAlpha *= 0.97;
-          ctx.strokeStyle = `rgba(6, 182, 212, ${shockwaveAlpha})`;
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, shockwaveRadius, 0, Math.PI * 2);
-          ctx.stroke();
+          shockwaveRadius += 18;
+          shockwaveAlpha *= 0.96;
+          
+          const drawShockwave = (yPos, alphaVal) => {
+            ctx.strokeStyle = `rgba(6, 182, 212, ${alphaVal})`;
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.arc(centerX, yPos, shockwaveRadius, 0, Math.PI * 2);
+            ctx.stroke();
+          };
+
+          drawShockwave(centerY - 50, shockwaveAlpha);
+          drawShockwave(floorY + (floorY - (centerY - 50)), shockwaveAlpha * 0.3);
         }
 
-        particles.forEach((p, idx) => {
-          // Slowly pull back to center for logo assembly
+        particles.forEach((p) => {
           const dx = centerX - p.x;
           const dy = centerY - p.y;
-          p.x += dx * 0.05;
-          p.y += dy * 0.05;
+          p.x += dx * 0.06;
+          p.y += dy * 0.06;
 
           ctx.fillStyle = '#06B6D4';
           ctx.beginPath();
@@ -269,44 +350,98 @@ export default function LandingPage({ onGetStarted }) {
         });
       }
 
-      // ── STAGE 5: LOGO REVEAL ──
+      // ── STAGE 5: PHYSICAL LOGO CONSTRUCTION (MAGNETIC SNAP & SPARKS) ──
       if (stage === 'logo') {
-        particles.forEach((p, idx) => {
-          const target = targets[idx % targets.length];
-          if (target) {
-            const dx = target.x - p.x;
-            const dy = target.y - p.y;
-            p.x += dx * 0.15;
-            p.y += dy * 0.15;
-            p.color = target.color;
+        // Draw Sparks
+        sparks.forEach((s) => {
+          s.x += s.vx;
+          s.y += s.vy;
+          s.vy += 0.25; // Gravity
+          s.alpha *= 0.93;
+          ctx.strokeStyle = `rgba(245, 158, 11, ${s.alpha})`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(s.x - s.vx * 1.5, s.y - s.vy * 1.5);
+          ctx.stroke();
+        });
+        sparks = sparks.filter((s) => s.alpha > 0.05);
+
+        // Render fragments snapping together
+        const drawFragments = (yOffset, isReflection) => {
+          ctx.save();
+          if (isReflection) {
+            ctx.globalAlpha = 0.28;
           }
 
-          ctx.fillStyle = p.color || '#2563EB';
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fill();
-        });
+          fragments.forEach((f) => {
+            if (!f.locked) {
+              const dx = f.tx - f.x;
+              const dy = (isReflection ? floorY + (floorY - f.ty) : f.ty) - f.y;
+              const dist = Math.hypot(dx, dy);
+
+              // Magnetic snap acceleration
+              if (dist < 4) {
+                f.locked = true;
+                // Spawn connection sparks on snapping
+                for (let k = 0; k < 12; k++) {
+                  sparks.push({
+                    x: f.tx,
+                    y: isReflection ? floorY + (floorY - f.ty) : f.ty,
+                    vx: (Math.random() - 0.5) * 5,
+                    vy: (Math.random() - 0.5) * 5 - 2,
+                    alpha: 1.0,
+                  });
+                }
+              } else {
+                f.x += dx * 0.08;
+                f.y += dy * 0.08;
+                f.angle += f.rotSpeed;
+              }
+            } else {
+              f.x = f.tx;
+              f.y = isReflection ? floorY + (floorY - f.ty) : f.ty;
+              f.angle = 0;
+            }
+
+            // Draw fragment block (brushed metal look)
+            ctx.save();
+            ctx.translate(f.x, f.y);
+            ctx.rotate(f.angle);
+            
+            const blockGrad = ctx.createLinearGradient(-f.size / 2, -f.size / 2, f.size / 2, f.size / 2);
+            blockGrad.addColorStop(0, '#3b82f6');
+            blockGrad.addColorStop(0.5, '#60a5fa');
+            blockGrad.addColorStop(1, '#1d4ed8');
+            ctx.fillStyle = blockGrad;
+            
+            ctx.beginPath();
+            ctx.rect(-f.size / 2, -f.size / 2, f.size, f.size);
+            ctx.fill();
+            ctx.restore();
+          });
+
+          ctx.restore();
+        };
+
+        drawFragments(centerY - 50, false);
+        drawFragments(floorY + (floorY - (centerY - 50)), true);
       }
 
-      // ── STAGE 6 & 7: TITLE & TRANSITION ──
-      if (stage === 'title' || stage === 'transition') {
-        particles.forEach((p, idx) => {
-          const target = targets[idx % targets.length];
-          if (target) {
-            const dx = target.x - p.x;
-            const dy = target.y - p.y;
-            // Breathe drift
-            p.x += dx * 0.1 + Math.sin(time + idx) * 0.15;
-            p.y += dy * 0.1 + Math.cos(time + idx) * 0.15;
-            p.color = target.color;
-          }
+      // ── POLISHED FLOOR ACCENT DIVISION LINE ──
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, floorY);
+      ctx.lineTo(w, floorY);
+      ctx.stroke();
 
-          ctx.fillStyle = p.color || '#2563EB';
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fill();
-        });
-      }
+      // Soft reflection backdrop overlay (simulating roughness)
+      const reflectionOverlay = ctx.createLinearGradient(0, floorY, 0, h);
+      reflectionOverlay.addColorStop(0, 'rgba(5, 8, 22, 0.3)');
+      reflectionOverlay.addColorStop(1, 'rgba(5, 8, 22, 0.95)');
+      ctx.fillStyle = reflectionOverlay;
+      ctx.fillRect(0, floorY, w, h - floorY);
 
       requestRef.current = requestAnimationFrame(render);
     };
@@ -320,15 +455,17 @@ export default function LandingPage({ onGetStarted }) {
   }, [stage]);
 
   return (
-    <div className="landing-container" style={{ background: '#050816' }}>
-      {/* 3D Canvas particle workspace */}
+    <div ref={containerRef} className="landing-container" style={{ background: '#030712' }}>
+      
+      {/* Volumetric analog noise film grain filter */}
+      <div className="film-grain-overlay"></div>
+
+      {/* Cinematic Canvas background */}
       {stage !== 'landing' && (
         <canvas ref={canvasRef} className="cinematic-canvas" />
       )}
-      
-      {stage !== 'landing' && <div className="cinematic-grid-overlay" />}
 
-      {/* ── INTRO SEQUENCE CONTROLLER (0s to 15s) ── */}
+      {/* ── INTRO SEQUENCE LAYER OVERLAYS ── */}
       {stage !== 'landing' && (
         <div className={`intro-overlay-container stage-${stage}`}>
           {/* Skip Intro */}
@@ -336,13 +473,13 @@ export default function LandingPage({ onGetStarted }) {
             Skip Intro →
           </button>
 
-          {/* STAGE 3: HUMAN PROBLEM - 3D flying document tunnel */}
+          {/* STAGE 3: HUMAN PROBLEM - 3D Text policies tunnel */}
           {stage === 'problem' && (
             <div className="problem-docs-container">
               {problemDocuments.map((doc, idx) => (
                 <div 
                   key={idx}
-                  className="problem-doc-card"
+                  className="problem-doc-card glass-reflection"
                   style={{
                     left: `${doc.x}%`,
                     top: `${doc.y}%`,
@@ -350,7 +487,9 @@ export default function LandingPage({ onGetStarted }) {
                     animationDelay: `${doc.delay}ms`
                   }}
                 >
-                  <h4>{doc.brand}</h4>
+                  <div className="brushed-metal-header">
+                    <span>{doc.brand}</span>
+                  </div>
                   <p>{doc.text}</p>
                 </div>
               ))}
@@ -358,12 +497,12 @@ export default function LandingPage({ onGetStarted }) {
               {glowingWords.map((word, idx) => (
                 <div 
                   key={idx}
-                  className="glowing-danger-word"
+                  className="glowing-danger-word text-glow"
                   style={{
                     left: `${word.x}%`,
                     top: `${word.y}%`,
                     color: word.color,
-                    textShadow: `0 0 15px ${word.color}`,
+                    textShadow: `0 0 20px ${word.color}`,
                     transform: `translateZ(${word.z}px)`
                   }}
                 >
@@ -373,7 +512,7 @@ export default function LandingPage({ onGetStarted }) {
             </div>
           )}
 
-          {/* STAGE 4: AI TAKES CONTROL - Glass cards revealed */}
+          {/* STAGE 4: AI TAKES CONTROL - Beautiful PBR Glass Cards */}
           {stage === 'control' && (
             <div className="control-glass-cards-overlay">
               <div className="wave-flash-effect"></div>
@@ -381,7 +520,7 @@ export default function LandingPage({ onGetStarted }) {
                 {glassCards.map((card, idx) => (
                   <div 
                     key={idx}
-                    className={`glass-metric-card ${activeCardIndex >= idx ? 'revealed' : ''}`}
+                    className={`glass-metric-card pbr-glass ${activeCardIndex >= idx ? 'revealed' : ''}`}
                   >
                     <div className="glass-card-inner">
                       <span className="glass-card-check">✓</span>
@@ -393,11 +532,19 @@ export default function LandingPage({ onGetStarted }) {
             </div>
           )}
 
-          {/* STAGE 5: LOGO REVEAL & STAGE 6: TITLE */}
+          {/* STAGE 5: LOGO REVEAL & TITLE STAGES */}
           {(stage === 'logo' || stage === 'title' || stage === 'transition') && (
-            <div className={`cinematic-logo-glow ${stage !== 'logo' ? 'active-halo' : ''}`}>
-              <Logo size={180} className="intro-svg-logo pulse-logo" />
-              <div className="glow-radial-halo"></div>
+            <div className="logo-glow-wrapper">
+              {/* Real Logo */}
+              <div className="cinematic-logo-glow active-halo">
+                <Logo size={180} className="intro-svg-logo pulse-logo" />
+                <div className="glow-radial-halo"></div>
+              </div>
+              {/* Mirror Reflection Logo on Floor */}
+              <div className="cinematic-logo-glow reflection-logo">
+                <Logo size={180} className="intro-svg-logo reflection-svg-logo" />
+                <div className="glow-radial-halo"></div>
+              </div>
             </div>
           )}
 
@@ -428,8 +575,9 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       )}
 
-      {/* ── STAGE 8: MAIN PREMIUM LANDING PAGE (Seamless assembly transition) ── */}
+      {/* ── STAGE 8: MAIN PREMIUM LANDING PAGE (Smooth zoom reveal) ── */}
       <div className={`landing-layout ${stage === 'landing' ? 'visible' : ''}`}>
+        
         {/* Header */}
         <header className="landing-header">
           <div className="landing-brand">
@@ -487,7 +635,7 @@ export default function LandingPage({ onGetStarted }) {
             </div>
           </div>
 
-          {/* Right Column: Premium Dashboard illustration */}
+          {/* Right Column: Premium Interactive Mockup */}
           <div className="hero-ill-col">
             <div className="dashboard-mockup">
               <div className="mock-header">
