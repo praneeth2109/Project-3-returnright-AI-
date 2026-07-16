@@ -1,12 +1,12 @@
 /**
- * Answer Generator — Claude API (GenAI) Edition
+ * Answer Generator — Hugging Face API Edition
  *
- * Uses the Anthropic Claude API to synthesize a natural, accurate answer
- * from TF-IDF retrieved policy chunks. Claude is strictly instructed to
+ * Uses the Hugging Face Inference API to synthesize a natural, accurate answer
+ * from retrieved policy chunks. The model is strictly instructed to
  * answer ONLY from the provided context — zero hallucination.
  */
 
-// Using native fetch for OpenRouter API
+// Using native fetch for Hugging Face API
 // Node 18+ includes native fetch
 
 /**
@@ -23,10 +23,10 @@ function buildContextBlock(chunks) {
 }
 
 /**
- * Generate a grounded, Claude-powered answer from retrieved policy chunks.
+ * Generate a grounded, Hugging Face-powered answer from retrieved policy chunks.
  *
  * @param {string} query  - The user's natural language question
- * @param {Array}  chunks - Top-ranked policy chunks from TF-IDF retrieval
+ * @param {Array}  chunks - Top-ranked policy chunks from retrieval
  * @returns {Object} { answer, primarySource, sources, confidence, model }
  */
 async function generateAnswer(query, chunks, history = []) {
@@ -45,7 +45,7 @@ async function generateAnswer(query, chunks, history = []) {
   const confidence = chunks[0].score > 1.0 ? 'high' : chunks[0].score > 0.3 ? 'medium' : 'low';
   const primarySource = `**${chunks[0].policyTitle}** › ${chunks[0].heading}`;
 
-  // --- Claude system prompt: strict grounding, no hallucination ---
+  // --- LLM system prompt: strict grounding, no hallucination ---
   const systemPrompt = `You are ReturnRight AI, a precise and helpful customer service assistant specializing in return and refund policies for a retail store.
 
 RULES YOU MUST FOLLOW:
@@ -90,7 +90,7 @@ Please answer the customer's question based strictly on the policy excerpts abov
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error?.message || 'Failed to fetch from OpenRouter');
+      throw new Error(data.error?.message || 'Failed to fetch from Hugging Face');
     }
 
     const answer = data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';
@@ -115,9 +115,9 @@ Please answer the customer's question based strictly on the policy excerpts abov
       outputTokens: data.usage?.completion_tokens,
     };
   } catch (err) {
-    console.error('OpenRouter API error:', err.message);
+    console.error('Hugging Face API error:', err.message);
 
-    // Graceful fallback: return the top chunk content directly if Claude fails
+    // Graceful fallback: return the top chunk content directly if HF fails
     return {
       answer: `Based on our **${chunks[0].heading}** policy:\n\n${chunks[0].content}`,
       primarySource,
