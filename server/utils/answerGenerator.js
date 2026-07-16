@@ -67,14 +67,25 @@ Customer question: "${query}"
 Please answer the customer's question based strictly on the policy excerpts above.`;
 
   try {
-    const response = await fetch("https://router.huggingface.co/v1/chat/completions", {
+    const useNvidia = !!process.env.NVIDIA_API_KEY;
+    const url = useNvidia 
+      ? "https://integrate.api.nvidia.com/v1/chat/completions" 
+      : "https://router.huggingface.co/v1/chat/completions";
+    const authHeader = useNvidia 
+      ? `Bearer ${process.env.NVIDIA_API_KEY}` 
+      : `Bearer ${process.env.HF_TOKEN}`;
+    const model = useNvidia 
+      ? "z-ai/glm-5.2" 
+      : (process.env.HF_MODEL || "microsoft/FastContext-1.0-4B-SFT:featherless-ai");
+
+    const response = await fetch(url, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.HF_TOKEN}`,
+        "Authorization": authHeader,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: process.env.HF_MODEL || "microsoft/FastContext-1.0-4B-SFT:featherless-ai",
+        model,
         messages: [
           { role: "system", content: systemPrompt },
           ...(history || []).map(msg => ({
@@ -83,14 +94,14 @@ Please answer the customer's question based strictly on the policy excerpts abov
           })),
           { role: "user", content: userPrompt }
         ],
-        max_tokens: 512
+        max_tokens: useNvidia ? 1024 : 512
       })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error?.message || 'Failed to fetch from Hugging Face');
+      throw new Error(data.error?.message || `Failed to fetch from ${useNvidia ? 'NVIDIA' : 'Hugging Face'}`);
     }
 
     const answer = data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';
