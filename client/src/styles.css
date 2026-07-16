@@ -2096,3 +2096,250 @@ html, body, #root {
   }
 }
 
+/* ── CINEMATIC TRAILER INTRO SEQUENCE ── */
+.cinematic-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  background: black;
+}
+
+.cinematic-grid-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
+  background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
+  pointer-events: none;
+}
+
+.intro-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: transparent;
+}
+
+.skip-intro-btn {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  z-index: 10;
+  pointer-events: auto;
+  transition: all 0.3s ease;
+}
+.skip-intro-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.cinematic-logo-glow {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px;
+  animation: logoAssembleScale 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes logoAssembleScale {
+  from { transform: scale(0.85); opacity: 0; filter: blur(10px); }
+  to { transform: scale(1); opacity: 1; filter: blur(0); }
+}
+
+.intro-svg-logo {
+  z-index: 2;
+}
+
+.pulse-logo {
+  animation: logoPulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes logoPulseGlow {
+  0%, 100% { filter: drop-shadow(0 0 15px rgba(37, 99, 235, 0.4)) drop-shadow(0 0 30px rgba(6, 182, 212, 0.2)); }
+  50% { filter: drop-shadow(0 0 35px rgba(37, 99, 235, 0.8)) drop-shadow(0 0 60px rgba(16, 185, 129, 0.4)); }
+}
+
+.glow-radial-halo {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(20px);
+  z-index: 1;
+}
+
+.active-halo .glow-radial-halo {
+  animation: haloPulse 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes haloPulse {
+  from { transform: scale(0.9); opacity: 0.5; }
+  to { transform: scale(1.15); opacity: 1; }
+}
+
+.cinematic-text-col {
+  text-align: center;
+  margin-top: 10px;
+  z-index: 3;
+}
+
+.cinematic-title {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  color: white;
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(15px);
+  filter: blur(4px);
+  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cinematic-title.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.cinematic-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  transform: translateY(10px);
+  filter: blur(2px);
+  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s;
+}
+.cinematic-subtitle.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* Staggered letter fade-in */
+.letter-span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: letterFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.letter-span-sub {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: letterFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes letterFadeIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scene 5: Floating glass cards */
+.cinematic-glass-cards-grid {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+.cinematic-glass-cards-grid.visible {
+  opacity: 1;
+}
+
+.glass-metric-card {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 20px;
+  color: rgba(255, 255, 255, 0.95);
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  transform: scale(0.7) translateY(40px);
+  opacity: 0;
+  transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.glass-metric-card.revealed {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Radial positions around the central logo */
+.glass-metric-card:nth-child(1) { top: 22%; left: 24%; }
+.glass-metric-card:nth-child(2) { top: 25%; right: 22%; }
+.glass-metric-card:nth-child(3) { top: 48%; left: 16%; }
+.glass-metric-card:nth-child(4) { top: 52%; right: 15%; }
+.glass-metric-card:nth-child(5) { bottom: 25%; left: 23%; }
+.glass-metric-card:nth-child(6) { bottom: 22%; right: 25%; }
+
+.glass-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.glass-card-check {
+  color: #10B981;
+  font-weight: bold;
+}
+
+/* Main Dashboard Fade In */
+.landing-layout {
+  opacity: 0;
+  transform: scale(0.96);
+  filter: blur(10px);
+  transition: all 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.landing-layout.visible {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+  pointer-events: auto;
+}
+
+/* Base modifications for the new landing style root container */
+.app-root-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: hidden;
+  background: black;
+}
+
