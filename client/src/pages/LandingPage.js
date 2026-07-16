@@ -4,13 +4,12 @@ import Logo from '../components/Logo';
 export default function LandingPage({ onGetStarted }) {
   const [stage, setStage] = useState('blueprint'); // 'blueprint', 'metallic', 'title', 'landing'
   const [mockScore, setMockScore] = useState(0);
+  const [demoActive, setDemoActive] = useState(false);
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
 
   // Timeline: 4 Seconds Reveal
   useEffect(() => {
-    // 0s - 1.5s: blueprint lines draw
-    
     // 1.5s: Metallic transformation
     const metallicTimer = setTimeout(() => {
       setStage('metallic');
