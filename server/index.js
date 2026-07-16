@@ -10,16 +10,26 @@ const { migrateEmbeddings } = require('./utils/embedMigrator');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/returnright';
-// CORS configuration — dynamically allow any localhost origin
+
+const allowedOrigins = [];
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+}
+
+// CORS configuration — dynamically allow localhost, CLIENT_URL, and netlify domains
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (e.g. curl, Postman, server-to-server)
     if (!origin) return callback(null, true);
 
-    // Allow any localhost/127.0.0.1 origin on any port
-    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    const isAllowed = 
+      allowedOrigins.includes(origin) ||
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+      origin.endsWith('.netlify.app');
+
+    if (isAllowed) {
       return callback(null, true);
-        }
+    }
 
     callback(new Error('Not allowed by CORS'));
   },
