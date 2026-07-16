@@ -130,79 +130,73 @@ export default function LandingPage({ onGetStarted }) {
     <div className="landing-container" style={{ background: '#050816' }}>
       
       {/* Blueprint grid background */}
-      {stage !== 'landing' && (
-        <canvas ref={canvasRef} className="cinematic-canvas" />
-      )}
+      <canvas ref={canvasRef} className={`cinematic-canvas stage-${stage}`} />
 
       {/* ── 4-SECOND BLUEPRINT INTRO CONTAINER ── */}
-      {stage !== 'landing' && (
-        <div className={`blueprint-intro-overlay stage-${stage}`}>
-          
-          <button className="skip-intro-btn" onClick={handleSkip}>
-            Skip Intro →
-          </button>
+      <div className={`blueprint-intro-overlay stage-${stage}`}>
+        
+        <button className="skip-intro-btn" onClick={handleSkip}>
+          Skip Intro →
+        </button>
 
-          <div className="blueprint-workspace">
-            {/* Blueprint Grid Vectors */}
-            {stage === 'blueprint' && (
-              <svg className="blueprint-vectors" viewBox="0 0 400 400">
-                {/* Diagonal lines */}
-                <line x1="50" y1="50" x2="350" y2="350" stroke="rgba(6, 182, 212, 0.12)" strokeDasharray="3,3" />
-                <line x1="350" y1="50" x2="50" y2="350" stroke="rgba(6, 182, 212, 0.12)" strokeDasharray="3,3" />
-                
-                {/* Horizontal / Vertical coordinate lines */}
-                <line x1="200" y1="20" x2="200" y2="380" stroke="rgba(6, 182, 212, 0.15)" strokeDasharray="5,5" />
-                <line x1="20" y1="200" x2="380" y2="200" stroke="rgba(6, 182, 212, 0.15)" strokeDasharray="5,5" />
+        <div className="blueprint-workspace">
+          {/* Blueprint Grid Vectors */}
+          <svg className="blueprint-vectors" viewBox="0 0 400 400">
+            {/* Diagonal lines */}
+            <line x1="50" y1="50" x2="350" y2="350" stroke="rgba(6, 182, 212, 0.12)" strokeDasharray="3,3" />
+            <line x1="350" y1="50" x2="50" y2="350" stroke="rgba(6, 182, 212, 0.12)" strokeDasharray="3,3" />
+            
+            {/* Horizontal / Vertical coordinate lines */}
+            <line x1="200" y1="20" x2="200" y2="380" stroke="rgba(6, 182, 212, 0.15)" strokeDasharray="5,5" />
+            <line x1="20" y1="200" x2="380" y2="200" stroke="rgba(6, 182, 212, 0.15)" strokeDasharray="5,5" />
 
-                {/* Outer drafting square bounds */}
-                <rect x="75" y="75" width="250" height="250" fill="none" stroke="rgba(6, 182, 212, 0.08)" />
+            {/* Outer drafting square bounds */}
+            <rect x="75" y="75" width="250" height="250" fill="none" stroke="rgba(6, 182, 212, 0.08)" />
 
-                {/* Drafting text indicators */}
-                <text x="208" y="70" fill="rgba(6, 182, 212, 0.45)" fontSize="9" fontFamily="monospace">W: 180.00mm</text>
-                <text x="330" y="205" fill="rgba(6, 182, 212, 0.45)" fontSize="9" fontFamily="monospace" rotate="90">H: 180.00mm</text>
-                <text x="210" y="325" fill="rgba(6, 182, 212, 0.4)" fontSize="8" fontFamily="monospace">SCALE: 1:1</text>
-                
-                {/* Dimension reference arrows */}
-                <path d="M75 60 L325 60" stroke="rgba(6, 182, 212, 0.25)" markerEnd="url(#arrow)" />
-                <path d="M340 75 L340 325" stroke="rgba(6, 182, 212, 0.25)" />
-              </svg>
-            )}
+            {/* Drafting text indicators */}
+            <text x="208" y="70" fill="rgba(6, 182, 212, 0.45)" fontSize="9" fontFamily="monospace">W: 180.00mm</text>
+            <text x="330" y="205" fill="rgba(6, 182, 212, 0.45)" fontSize="9" fontFamily="monospace" rotate="90">H: 180.00mm</text>
+            <text x="210" y="325" fill="rgba(6, 182, 212, 0.4)" fontSize="8" fontFamily="monospace">SCALE: 1:1</text>
+            
+            {/* Dimension reference arrows */}
+            <path d="M75 60 L325 60" stroke="rgba(6, 182, 212, 0.25)" markerEnd="url(#arrow)" />
+            <path d="M340 75 L340 325" stroke="rgba(6, 182, 212, 0.25)" />
+          </svg>
 
-            {/* Drawing/Solid Logo Object wrapper */}
-            <div className={`blueprint-logo-container ${stage}`}>
-              <Logo size={160} className="blueprint-logo-element" />
-              <div className="metallic-glow-halo"></div>
-            </div>
+          {/* Drawing/Solid Logo Object wrapper */}
+          <div className={`blueprint-logo-container ${stage}`}>
+            <Logo size={160} className="blueprint-logo-element" />
+            <div className="metallic-glow-halo"></div>
           </div>
-
-          {/* Spaced title reveal */}
-          <div className="blueprint-title-row">
-            <h1 className={`blueprint-title ${(stage === 'title' || stage === 'metallic') ? 'fade-in' : ''}`}>
-              {'ReturnRight AI'.split('').map((char, index) => (
-                <span 
-                  key={index} 
-                  style={{ animationDelay: `${0.1 + index * 0.05}s` }}
-                  className="letter-span"
-                >
-                  {char === ' ' ? '\u00A0' : char}
-                </span>
-              ))}
-            </h1>
-            <p className={`blueprint-subtitle ${(stage === 'title') ? 'fade-in' : ''}`}>
-              {'Understand Return Policies in Seconds'.split('').map((char, index) => (
-                <span 
-                  key={index} 
-                  style={{ animationDelay: `${0.6 + index * 0.02}s` }}
-                  className="letter-span-sub"
-                >
-                  {char === ' ' ? '\u00A0' : char}
-                </span>
-              ))}
-            </p>
-          </div>
-
         </div>
-      )}
+
+        {/* Spaced title reveal */}
+        <div className="blueprint-title-row">
+          <h1 className={`blueprint-title ${(stage === 'title' || stage === 'metallic') ? 'fade-in' : ''}`}>
+            {'ReturnRight AI'.split('').map((char, index) => (
+              <span 
+                key={index} 
+                style={{ animationDelay: `${0.1 + index * 0.05}s` }}
+                className="letter-span"
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </span>
+            ))}
+          </h1>
+          <p className={`blueprint-subtitle ${(stage === 'title') ? 'fade-in' : ''}`}>
+            {'Understand Return Policies in Seconds'.split('').map((char, index) => (
+              <span 
+                key={index} 
+                style={{ animationDelay: `${0.6 + index * 0.02}s` }}
+                className="letter-span-sub"
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </span>
+            ))}
+          </p>
+        </div>
+
+      </div>
 
       {/* ── MAIN LANDING DASHBOARD (Fades in seamlessly) ── */}
       <div className={`landing-layout ${stage === 'landing' ? 'visible' : ''}`}>
