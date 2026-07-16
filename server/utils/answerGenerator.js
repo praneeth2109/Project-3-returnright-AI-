@@ -67,16 +67,17 @@ Customer question: "${query}"
 Please answer the customer's question based strictly on the policy excerpts above.`;
 
   try {
-    const useNvidia = !!process.env.NVIDIA_API_KEY;
+    const apiKey = (process.env.NVIDIA_API_KEY || '').trim();
+    const useNvidia = !!apiKey;
     const url = useNvidia 
       ? "https://integrate.api.nvidia.com/v1/chat/completions" 
       : "https://router.huggingface.co/v1/chat/completions";
     const authHeader = useNvidia 
-      ? `Bearer ${process.env.NVIDIA_API_KEY}` 
-      : `Bearer ${process.env.HF_TOKEN}`;
+      ? `Bearer ${apiKey}` 
+      : `Bearer ${(process.env.HF_TOKEN || '').trim()}`;
     const model = useNvidia 
       ? "z-ai/glm-5.2" 
-      : (process.env.HF_MODEL || "microsoft/FastContext-1.0-4B-SFT:featherless-ai");
+      : ((process.env.HF_MODEL || '').trim() || "microsoft/FastContext-1.0-4B-SFT:featherless-ai");
 
     const response = await fetch(url, {
       method: "POST",
