@@ -12,9 +12,10 @@ const api = axios.create({
  * Send a query to the retrieval engine.
  * @param {string} question - Natural language question
  * @param {string|null} category - Optional category filter
+ * @param {Array} history - Previous messages history
  */
-export async function sendQuery(question, category = null) {
-  const { data } = await api.post('/query', { question, category });
+export async function sendQuery(question, category = null, history = []) {
+  const { data } = await api.post('/query', { question, category, history });
   return data;
 }
 

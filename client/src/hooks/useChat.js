@@ -29,12 +29,21 @@ export function useChat() {
       timestamp: new Date(),
     };
 
+    // Gather history before state updates (excluding welcome and error messages, limit to last 6 messages)
+    const history = messages
+      .filter((msg) => msg.id !== 'welcome' && !msg.isError)
+      .map((msg) => ({
+        role: msg.role,
+        text: msg.text,
+      }))
+      .slice(-6);
+
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await sendQuery(question, category);
+      const result = await sendQuery(question, category, history);
 
       const assistantMsg = {
         id: `assistant_${Date.now()}`,
@@ -64,7 +73,7 @@ export function useChat() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [messages]);
 
   const clearChat = useCallback(() => {
     setMessages([

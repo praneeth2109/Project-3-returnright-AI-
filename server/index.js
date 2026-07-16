@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const policyRoutes = require('./routes/policies');
 const queryRoutes = require('./routes/query');
 const { seedDatabase } = require('./utils/seeder');
+const { migrateEmbeddings } = require('./utils/embedMigrator');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,7 +19,7 @@ const corsOptions = {
     // Allow any localhost/127.0.0.1 origin on any port
     if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
       return callback(null, true);
-    }
+        }
 
     callback(new Error('Not allowed by CORS'));
   },
@@ -47,6 +48,8 @@ mongoose
     console.log('✅ Connected to MongoDB');
     // Seed the database with sample policies on first run
     await seedDatabase();
+    // Run embeddings migration to populate vector data
+    await migrateEmbeddings();
     app.listen(PORT, () => {
       console.log(`🚀 ReturnRight AI server running on http://localhost:${PORT}`);
     });

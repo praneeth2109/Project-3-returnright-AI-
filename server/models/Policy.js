@@ -7,6 +7,8 @@ const SectionSchema = new mongoose.Schema({
   content: { type: String, required: true },
   // Pre-computed TF-IDF term frequencies stored here
   termFrequencies: { type: Map, of: Number, default: {} },
+  // 384-dimensional vector embedding stored here
+  embedding: { type: [Number], default: [] },
 });
 
 const PolicySchema = new mongoose.Schema(

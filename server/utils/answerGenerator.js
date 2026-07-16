@@ -29,7 +29,7 @@ function buildContextBlock(chunks) {
  * @param {Array}  chunks - Top-ranked policy chunks from TF-IDF retrieval
  * @returns {Object} { answer, primarySource, sources, confidence, model }
  */
-async function generateAnswer(query, chunks) {
+async function generateAnswer(query, chunks, history = []) {
   // --- No chunks found: return graceful fallback ---
   if (!chunks || chunks.length === 0) {
     return {
@@ -67,16 +67,20 @@ Customer question: "${query}"
 Please answer the customer's question based strictly on the policy excerpts above.`;
 
   try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const response = await fetch("https://router.huggingface.co/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "Authorization": `Bearer ${process.env.HF_TOKEN}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "anthropic/claude-3.5-haiku",
+        model: process.env.HF_MODEL || "microsoft/FastContext-1.0-4B-SFT:featherless-ai",
         messages: [
           { role: "system", content: systemPrompt },
+          ...(history || []).map(msg => ({
+            role: msg.role === 'user' ? 'user' : 'assistant',
+            content: msg.text
+          })),
           { role: "user", content: userPrompt }
         ],
         max_tokens: 512

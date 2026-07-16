@@ -1,6 +1,8 @@
 const Policy = require('../models/Policy');
 const { computeTermFrequency } = require('../utils/retrieval');
 const { v4: uuidv4 } = require('uuid');
+const { getEmbedding } = require('../utils/embeddings');
+
 
 /**
  * GET /api/policies
@@ -62,13 +64,19 @@ async function createPolicy(req, res) {
       return res.status(409).json({ error: `A policy for category "${category}" already exists.` });
     }
 
-    // Pre-compute TF-IDF for each section
-    const processedSections = sections.map((section, i) => ({
-      id: section.id || `${category}_${uuidv4().slice(0, 8)}`,
-      heading: section.heading,
-      content: section.content,
-      termFrequencies: computeTermFrequency(`${section.heading} ${section.content}`),
-    }));
+    // Pre-compute TF-IDF and embeddings for each section
+    const processedSections = [];
+    for (let section of sections) {
+      const text = `${section.heading} ${section.content}`;
+      const embedding = await getEmbedding(text);
+      processedSections.push({
+        id: section.id || `${category}_${uuidv4().slice(0, 8)}`,
+        heading: section.heading,
+        content: section.content,
+        termFrequencies: computeTermFrequency(text),
+        embedding: embedding || [],
+      });
+    }
 
     const policy = await Policy.create({
       id: `pol_${category.toLowerCase()}_${uuidv4().slice(0, 8)}`,
@@ -134,13 +142,19 @@ async function updatePolicyByCategory(req, res) {
 
     const updatedCategory = newCategory ? newCategory.toLowerCase() : category.toLowerCase();
 
-    // Pre-compute TF-IDF for each section
-    const processedSections = sections.map((section) => ({
-      id: section.id || `${updatedCategory}_${uuidv4().slice(0, 8)}`,
-      heading: section.heading,
-      content: section.content,
-      termFrequencies: computeTermFrequency(`${section.heading} ${section.content}`),
-    }));
+    // Pre-compute TF-IDF and embeddings for each section
+    const processedSections = [];
+    for (let section of sections) {
+      const text = `${section.heading} ${section.content}`;
+      const embedding = await getEmbedding(text);
+      processedSections.push({
+        id: section.id || `${updatedCategory}_${uuidv4().slice(0, 8)}`,
+        heading: section.heading,
+        content: section.content,
+        termFrequencies: computeTermFrequency(text),
+        embedding: embedding || [],
+      });
+    }
 
     const updatedPolicy = await Policy.findOneAndUpdate(
       { category: category.toLowerCase() },

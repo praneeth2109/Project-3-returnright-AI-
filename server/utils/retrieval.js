@@ -127,4 +127,74 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-module.exports = { tokenize, computeTermFrequency, retrieveTopChunks, highlightKeywords };
+/**
+ * Computes the Cosine Similarity between two numeric vectors.
+ */
+function cosineSimilarity(vecA, vecB) {
+  if (!vecA || !vecB || vecA.length === 0 || vecB.length === 0 || vecA.length !== vecB.length) {
+    return 0;
+  }
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+  if (normA === 0 || normB === 0) return 0;
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+/**
+ * Ranks policy chunks using dense vector cosine similarity instead of TF-IDF word counts.
+ */
+function retrieveSemanticChunks(queryText, queryEmbedding, chunks, topN = 3, categoryFilter = null) {
+  if (!queryEmbedding || queryEmbedding.length === 0) {
+    return [];
+  }
+
+  const queryTokens = tokenize(queryText || "");
+
+  // Filter by category if requested
+  const candidates = categoryFilter
+    ? chunks.filter((c) => c.category === categoryFilter.toLowerCase())
+    : chunks;
+
+  // Score candidates
+  const scored = candidates.map((chunk) => {
+    const similarity = cosineSimilarity(queryEmbedding, chunk.embedding || []);
+    // Cosine similarity ranges -1 to 1; threshold negative results to 0
+    const score = parseFloat(Math.max(0, similarity).toFixed(4));
+
+    // Gather matched keywords for highlighting in UI
+    const matchedTerms = new Set();
+    const chunkTokens = new Set(tokenize(chunk.content));
+    queryTokens.forEach((term) => {
+      if (chunkTokens.has(term)) {
+        matchedTerms.add(term);
+      }
+    });
+
+    return {
+      ...chunk,
+      score: score,
+      matchedKeywords: Array.from(matchedTerms),
+    };
+  });
+
+  // Sort descending by similarity score
+  return scored
+    .filter((c) => c.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topN);
+}
+
+module.exports = {
+  tokenize,
+  computeTermFrequency,
+  retrieveTopChunks,
+  highlightKeywords,
+  cosineSimilarity,
+  retrieveSemanticChunks
+};
