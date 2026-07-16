@@ -2,15 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Logo from '../components/Logo';
 
 export default function LandingPage({ onGetStarted }) {
-  const [stage, setStage] = useState('ambient'); // 'ambient', 'vortex', 'explode', 'assemble', 'logoGlow', 'landing'
+  const [stage, setStage] = useState('darkness'); // 'darkness', 'awakens', 'problem', 'control', 'logo', 'title', 'transition', 'landing'
   const [activeCardIndex, setActiveCardIndex] = useState(-1);
   const [demoActive, setDemoActive] = useState(false);
   const [mockScore, setMockScore] = useState(0);
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
-  const particlesRef = useRef([]);
 
-  // Glass cards to reveal in Scene 5
+  // Status cards for Stage 'control'
   const glassCards = [
     { text: '✓ Return Eligible', delay: 0 },
     { text: '✓ Refund Available', delay: 200 },
@@ -20,51 +19,78 @@ export default function LandingPage({ onGetStarted }) {
     { text: '✓ Confidence 98%', delay: 1000 },
   ];
 
+  // Documents/legal text terms for Stage 'problem'
+  const problemDocuments = [
+    { brand: 'Amazon Return Policy', text: 'All return requests must be submitted within the established window. Items returned without authorization will be subject to a restocking fee of up to 20%...', delay: 0, x: 15, y: 20, z: -800 },
+    { brand: 'Nike Store Terms', text: 'Products must be returned unworn and unwashed with original tags attached. Final sale and custom configurations are strictly non-refundable under any conditions...', delay: 100, x: 75, y: 15, z: -600 },
+    { brand: 'Apple Policy Details', text: 'Hardware returns are subject to a 14-day window. Opened software, custom-configured Macs, and activated subscriptions are strictly final sale...', delay: 200, x: 20, y: 70, z: -400 },
+    { brand: 'Adidas Returns', text: 'Items must be returned in their original packaging. Returns that do not satisfy our strict quality inspection will be rejected and sent back...', delay: 300, x: 80, y: 70, z: -200 },
+  ];
+
+  const glowingWords = [
+    { text: 'NON REFUNDABLE', x: 25, y: 35, z: -500, color: '#EF4444' },
+    { text: 'RESTOCKING FEE', x: 70, y: 45, z: -350, color: '#F59E0B' },
+    { text: '30 DAYS ONLY', x: 30, y: 60, z: -200, color: '#3B82F6' },
+    { text: 'FINAL SALE', x: 65, y: 25, z: -100, color: '#EF4444' },
+  ];
+
   // Timeline Controller
   useEffect(() => {
-    // Stage 1: Ambient particles drifting (0s - 3s)
+    // Stage 1: Darkness (0s - 2s)
     
-    // Stage 2: Vortex convergence (3s)
-    const vortexTimer = setTimeout(() => {
-      setStage('vortex');
-    }, 3000);
+    // Stage 2: AI Awakens (2s)
+    const awakensTimer = setTimeout(() => {
+      setStage('awakens');
+    }, 2000);
 
-    // Stage 3: Slow-motion fragment explosion (5.5s)
-    const explodeTimer = setTimeout(() => {
-      setStage('explode');
-    }, 5500);
+    // Stage 3: Human Problem (4s)
+    const problemTimer = setTimeout(() => {
+      setStage('problem');
+    }, 4000);
 
-    // Stage 4: Intelligently assemble logo symbol (7.5s)
-    const assembleTimer = setTimeout(() => {
-      setStage('assemble');
-    }, 7500);
-
-    // Stage 5: Completed Logo glows and emits wave (9.5s)
-    const glowTimer = setTimeout(() => {
-      setStage('logoGlow');
-      // Reveal glass cards one-by-one
+    // Stage 4: AI Takes Control (7s)
+    const controlTimer = setTimeout(() => {
+      setStage('control');
+      // Reveal glass cards
       glassCards.forEach((_, idx) => {
         setTimeout(() => {
           setActiveCardIndex(idx);
-        }, 300 + idx * 300);
+        }, 400 + idx * 250);
       });
-    }, 9500);
+    }, 7000);
 
-    // Stage 6: Camera pulls back, full landing dashboard fades in (13.5s)
+    // Stage 5: Logo Reveal (10s)
+    const logoTimer = setTimeout(() => {
+      setStage('logo');
+    }, 10000);
+
+    // Stage 6: Title (12s)
+    const titleTimer = setTimeout(() => {
+      setStage('title');
+    }, 12000);
+
+    // Stage 7: Transition (14s)
+    const transitionTimer = setTimeout(() => {
+      setStage('transition');
+    }, 14000);
+
+    // Stage 8: Landing Page Live (15.5s)
     const landingTimer = setTimeout(() => {
       setStage('landing');
-    }, 13500);
+    }, 15500);
 
     return () => {
-      clearTimeout(vortexTimer);
-      clearTimeout(explodeTimer);
-      clearTimeout(assembleTimer);
-      clearTimeout(glowTimer);
+      clearTimeout(awakensTimer);
+      clearTimeout(problemTimer);
+      clearTimeout(controlTimer);
+      clearTimeout(logoTimer);
+      clearTimeout(titleTimer);
+      clearTimeout(transitionTimer);
       clearTimeout(landingTimer);
     };
   }, []);
 
-  // Dashboard Mockup Animation - count up confidence meter
+  // Score Count-up
   useEffect(() => {
     if (stage === 'landing') {
       const interval = setInterval(() => {
@@ -75,17 +101,16 @@ export default function LandingPage({ onGetStarted }) {
           }
           return prev + 2;
         });
-      }, 30);
+      }, 25);
       return () => clearInterval(interval);
     }
   }, [stage]);
 
-  // Skip animation handler
   const handleSkip = () => {
     setStage('landing');
   };
 
-  // Canvas particle engine
+  // Canvas particle timeline engine
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -103,26 +128,19 @@ export default function LandingPage({ onGetStarted }) {
     const centerX = w / 2;
     const centerY = h / 2;
 
-    // Generate Logo assembly targets (shield contour, inner box, arrow points)
+    // Generate Shield targets for Stage 'logo'
     const targets = [];
-    
-    // 1. Shield outline points (approx. 100 points)
-    for (let i = 0; i < 100; i++) {
-      const t = (i / 100) * Math.PI * 2;
-      // Shield parametric form: curves down to bottom tip
-      const x = centerX + 110 * Math.sin(t) * (1.2 - 0.25 * Math.cos(t));
+    for (let i = 0; i < 120; i++) {
+      const t = (i / 120) * Math.PI * 2;
+      const x = centerX + 110 * Math.sin(t) * (1.25 - 0.25 * Math.cos(t));
       const y = centerY + 110 * Math.cos(t) + 30 * Math.abs(Math.sin(t)) - 25;
-      targets.push({ x, y, color: '#2563EB' }); // Blue
+      targets.push({ x, y, color: '#2563EB' });
     }
-
-    // 2. Center shopping package points (approx. 60 points)
-    for (let i = 0; i < 20; i++) {
-      // Top face path
-      const progress = i / 20;
+    // Generate Inner box targets
+    for (let i = 0; i < 40; i++) {
+      const progress = i / 40;
       targets.push({ x: centerX - 35 + progress * 70, y: centerY - 25 + (progress < 0.5 ? progress * 30 : (1 - progress) * 30), color: '#06B6D4' });
-      // Left vertical face
       targets.push({ x: centerX - 35, y: centerY - 10 + progress * 50, color: '#3b82f6' });
-      // Right vertical face
       targets.push({ x: centerX + 35, y: centerY - 10 + progress * 50, color: '#10B981' });
     }
 
@@ -130,59 +148,63 @@ export default function LandingPage({ onGetStarted }) {
     const particles = [];
     for (let i = 0; i < 600; i++) {
       particles.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        z: Math.random() * 200 - 100,
-        vx: (Math.random() - 0.5) * 1.5,
-        vy: (Math.random() - 0.5) * 1.5,
-        radius: Math.random() * 1.8 + 0.6,
-        color: Math.random() > 0.45 ? '#2563EB' : '#10B981', // Blue or Emerald
-        alpha: Math.random() * 0.7 + 0.3,
+        x: w / 2 + (Math.random() - 0.5) * 10,
+        y: h / 2 + (Math.random() - 0.5) * 10,
+        vx: (Math.random() - 0.5) * 0.2,
+        vy: (Math.random() - 0.5) * 0.2,
+        radius: Math.random() * 1.6 + 0.5,
+        color: '#2563EB',
+        alpha: Math.random() * 0.8 + 0.2,
         trail: [],
+        angle: Math.random() * Math.PI * 2,
+        distance: Math.random() * 200 + 50,
+        speed: Math.random() * 0.02 + 0.005,
       });
     }
-    particlesRef.current = particles;
 
     let time = 0;
+    let shockwaveRadius = 0;
+    let shockwaveAlpha = 1.0;
 
     const render = () => {
       time += 0.016;
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // Trail effect in canvas background
-      ctx.fillRect(0, 0, w, h);
-
-      // Draw faint digital grid in background
-      ctx.strokeStyle = 'rgba(37, 99, 235, 0.02)';
-      ctx.lineWidth = 1;
-      const gridSize = 60;
-      for (let x = 0; x < w; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
-        ctx.stroke();
-      }
-      for (let y = 0; y < h; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
+      
+      // Stage darkness has complete black backdrop. Later stages use light trail alpha.
+      if (stage === 'darkness') {
+        ctx.fillStyle = '#050816';
+        ctx.fillRect(0, 0, w, h);
+      } else {
+        ctx.fillStyle = 'rgba(5, 8, 22, 0.16)';
+        ctx.fillRect(0, 0, w, h);
       }
 
-      // Render & Animate Particles
-      particles.forEach((p, idx) => {
-        // Handle stages
-        if (stage === 'ambient') {
-          // Drifting
-          p.x += p.vx;
-          p.y += p.vy;
-          if (p.x < 0 || p.x > w) p.vx *= -1;
-          if (p.y < 0 || p.y > h) p.vy *= -1;
+      // ── STAGE 1: DARKNESS (Pulsing Single Particle) ──
+      if (stage === 'darkness') {
+        const pulse = 4 + Math.sin(time * 6) * 1.8;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#2563EB';
+        ctx.fillStyle = '#3B82F6';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, pulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0; // Reset
+      }
 
-          // Connect nearby particles with thin neural lines
-          for (let j = idx + 1; j < idx + 8; j++) {
+      // ── STAGE 2: AI AWAKENS (Neural network grows) ──
+      if (stage === 'awakens') {
+        // Particles drift outward into orbit positions
+        particles.forEach((p, idx) => {
+          p.x = centerX + Math.cos(p.angle) * p.distance;
+          p.y = centerY + Math.sin(p.angle) * p.distance;
+          p.distance += (p.distance < 300 ? 1.5 : 0.2);
+          p.angle += p.speed;
+
+          // Drawing neural lines between close nodes
+          for (let j = idx + 1; j < idx + 6; j++) {
             const other = particles[j % particles.length];
-            const dist = Math.hypot(p.x - other.x, p.y - other.y);
-            if (dist < 100) {
-              ctx.strokeStyle = `rgba(6, 182, 212, ${0.08 * (1 - dist / 100)})`;
+            const d = Math.hypot(p.x - other.x, p.y - other.y);
+            if (d < 120) {
+              ctx.strokeStyle = `rgba(37, 99, 235, ${0.1 * (1 - d / 120)})`;
               ctx.lineWidth = 0.5;
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
@@ -190,86 +212,101 @@ export default function LandingPage({ onGetStarted }) {
               ctx.stroke();
             }
           }
-        } else if (stage === 'vortex') {
-          // Spiraling towards center (accelerating)
-          const dx = centerX - p.x;
-          const dy = centerY - p.y;
-          const dist = Math.hypot(dx, dy) || 1;
 
-          const speed = Math.min(8, 400 / dist);
-          const pullX = dx / dist;
-          const pullY = dy / dist;
-          const tangentX = -pullY;
-          const tangentY = pullX;
-
-          p.vx += pullX * 0.2 + tangentX * 0.35;
-          p.vy += pullY * 0.2 + tangentY * 0.35;
-
-          // Apply speed limit
-          p.vx = Math.max(-10, Math.min(10, p.vx));
-          p.vy = Math.max(-10, Math.min(10, p.vy));
-
-          p.x += p.vx;
-          p.y += p.vy;
-        } else if (stage === 'explode') {
-          // First frame of explosion assigns high speed outward
-          if (!p.exploded) {
-            const angle = Math.random() * Math.PI * 2;
-            const force = Math.random() * 18 + 6;
-            p.vx = Math.cos(angle) * force;
-            p.vy = Math.sin(angle) * force;
-            p.exploded = true;
-          }
-
-          // Slow-motion drag simulation (decay speed)
-          p.vx *= 0.89;
-          p.vy *= 0.89;
-
-          p.x += p.vx;
-          p.y += p.vy;
-
-          // Draw trails
-          p.trail.push({ x: p.x, y: p.y });
-          if (p.trail.length > 8) p.trail.shift();
-          
+          // Draw node
+          ctx.fillStyle = '#2563EB';
           ctx.beginPath();
-          ctx.strokeStyle = p.color;
-          ctx.globalAlpha = p.alpha * 0.6;
-          ctx.lineWidth = p.radius * 0.8;
-          p.trail.forEach((pos, i) => {
-            if (i === 0) ctx.moveTo(pos.x, pos.y);
-            else ctx.lineTo(pos.x, pos.y);
-          });
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      // ── STAGE 3: HUMAN PROBLEM (Particles fly past like stars) ──
+      if (stage === 'problem') {
+        particles.forEach((p) => {
+          // Rapid starfield movement
+          p.x += Math.cos(p.angle) * 8;
+          p.y += Math.sin(p.angle) * 8;
+
+          // Wrap around screen
+          if (p.x < 0 || p.x > w || p.y < 0 || p.y > h) {
+            p.x = centerX + (Math.random() - 0.5) * 100;
+            p.y = centerY + (Math.random() - 0.5) * 100;
+            p.angle = Math.random() * Math.PI * 2;
+          }
+
+          ctx.fillStyle = '#10B981';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      // ── STAGE 4: AI TAKES CONTROL (Shockwave & Freeze) ──
+      if (stage === 'control') {
+        // Shockwave expansion
+        if (shockwaveRadius < w) {
+          shockwaveRadius += 16;
+          shockwaveAlpha *= 0.97;
+          ctx.strokeStyle = `rgba(6, 182, 212, ${shockwaveAlpha})`;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, shockwaveRadius, 0, Math.PI * 2);
           ctx.stroke();
-          ctx.globalAlpha = 1.0;
-        } else if (stage === 'assemble') {
-          // Converge onto targets
-          const target = targets[idx % targets.length];
-          if (target) {
-            const dx = target.x - p.x;
-            const dy = target.y - p.y;
-            p.x += dx * 0.12;
-            p.y += dy * 0.12;
-            p.color = target.color;
-          }
-        } else if (stage === 'logoGlow' || stage === 'landing') {
-          // Slow breathing drift around logo outline
-          const target = targets[idx % targets.length];
-          if (target) {
-            const dx = target.x - p.x;
-            const dy = target.y - p.y;
-            p.x += dx * 0.08 + Math.sin(time + idx) * 0.1;
-            p.y += dy * 0.08 + Math.cos(time + idx) * 0.1;
-            p.color = target.color;
-          }
         }
 
-        // Draw particle node
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
+        particles.forEach((p, idx) => {
+          // Slowly pull back to center for logo assembly
+          const dx = centerX - p.x;
+          const dy = centerY - p.y;
+          p.x += dx * 0.05;
+          p.y += dy * 0.05;
+
+          ctx.fillStyle = '#06B6D4';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      // ── STAGE 5: LOGO REVEAL ──
+      if (stage === 'logo') {
+        particles.forEach((p, idx) => {
+          const target = targets[idx % targets.length];
+          if (target) {
+            const dx = target.x - p.x;
+            const dy = target.y - p.y;
+            p.x += dx * 0.15;
+            p.y += dy * 0.15;
+            p.color = target.color;
+          }
+
+          ctx.fillStyle = p.color || '#2563EB';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      // ── STAGE 6 & 7: TITLE & TRANSITION ──
+      if (stage === 'title' || stage === 'transition') {
+        particles.forEach((p, idx) => {
+          const target = targets[idx % targets.length];
+          if (target) {
+            const dx = target.x - p.x;
+            const dy = target.y - p.y;
+            // Breathe drift
+            p.x += dx * 0.1 + Math.sin(time + idx) * 0.15;
+            p.y += dy * 0.1 + Math.cos(time + idx) * 0.15;
+            p.color = target.color;
+          }
+
+          ctx.fillStyle = p.color || '#2563EB';
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
 
       requestRef.current = requestAnimationFrame(render);
     };
@@ -283,49 +320,104 @@ export default function LandingPage({ onGetStarted }) {
   }, [stage]);
 
   return (
-    <div className="landing-container">
-      {/* Cinematic HTML5 Canvas Background */}
+    <div className="landing-container" style={{ background: '#050816' }}>
+      {/* 3D Canvas particle workspace */}
       {stage !== 'landing' && (
         <canvas ref={canvasRef} className="cinematic-canvas" />
       )}
-
-      {/* Grid Overlay for depth */}
+      
       {stage !== 'landing' && <div className="cinematic-grid-overlay" />}
 
-      {/* ── INTRO TIMELINE STAGE RENDERERS ── */}
+      {/* ── INTRO SEQUENCE CONTROLLER (0s to 15s) ── */}
       {stage !== 'landing' && (
-        <div className="intro-container">
-          {/* Skip Intro Button */}
+        <div className={`intro-overlay-container stage-${stage}`}>
+          {/* Skip Intro */}
           <button className="skip-intro-btn" onClick={handleSkip}>
             Skip Intro →
           </button>
 
-          {/* Logo assembly glow scene */}
-          {(stage === 'assemble' || stage === 'logoGlow') && (
-            <div className={`cinematic-logo-glow ${stage === 'logoGlow' ? 'active-halo' : ''}`}>
-              <Logo size={180} className={`intro-svg-logo ${stage === 'logoGlow' ? 'pulse-logo' : ''}`} />
+          {/* STAGE 3: HUMAN PROBLEM - 3D flying document tunnel */}
+          {stage === 'problem' && (
+            <div className="problem-docs-container">
+              {problemDocuments.map((doc, idx) => (
+                <div 
+                  key={idx}
+                  className="problem-doc-card"
+                  style={{
+                    left: `${doc.x}%`,
+                    top: `${doc.y}%`,
+                    transform: `translateZ(${doc.z}px)`,
+                    animationDelay: `${doc.delay}ms`
+                  }}
+                >
+                  <h4>{doc.brand}</h4>
+                  <p>{doc.text}</p>
+                </div>
+              ))}
+
+              {glowingWords.map((word, idx) => (
+                <div 
+                  key={idx}
+                  className="glowing-danger-word"
+                  style={{
+                    left: `${word.x}%`,
+                    top: `${word.y}%`,
+                    color: word.color,
+                    textShadow: `0 0 15px ${word.color}`,
+                    transform: `translateZ(${word.z}px)`
+                  }}
+                >
+                  {word.text}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* STAGE 4: AI TAKES CONTROL - Glass cards revealed */}
+          {stage === 'control' && (
+            <div className="control-glass-cards-overlay">
+              <div className="wave-flash-effect"></div>
+              <div className="control-glass-cards-grid">
+                {glassCards.map((card, idx) => (
+                  <div 
+                    key={idx}
+                    className={`glass-metric-card ${activeCardIndex >= idx ? 'revealed' : ''}`}
+                  >
+                    <div className="glass-card-inner">
+                      <span className="glass-card-check">✓</span>
+                      <span>{card.text.replace('✓ ', '')}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* STAGE 5: LOGO REVEAL & STAGE 6: TITLE */}
+          {(stage === 'logo' || stage === 'title' || stage === 'transition') && (
+            <div className={`cinematic-logo-glow ${stage !== 'logo' ? 'active-halo' : ''}`}>
+              <Logo size={180} className="intro-svg-logo pulse-logo" />
               <div className="glow-radial-halo"></div>
             </div>
           )}
 
-          {/* Title and subtext animation */}
           <div className="cinematic-text-col">
-            <h1 className={`cinematic-title ${stage === 'logoGlow' ? 'fade-in' : ''}`}>
+            <h1 className={`cinematic-title ${(stage === 'title' || stage === 'transition') ? 'fade-in' : ''}`}>
               {'ReturnRight AI'.split('').map((char, index) => (
                 <span 
                   key={index} 
-                  style={{ animationDelay: `${0.1 + index * 0.05}s` }}
+                  style={{ animationDelay: `${0.1 + index * 0.04}s` }}
                   className="letter-span"
                 >
                   {char === ' ' ? '\u00A0' : char}
                 </span>
               ))}
             </h1>
-            <p className={`cinematic-subtitle ${stage === 'logoGlow' ? 'fade-in' : ''}`}>
+            <p className={`cinematic-subtitle ${(stage === 'title' || stage === 'transition') ? 'fade-in' : ''}`}>
               {'Understand Return Policies in Seconds'.split('').map((char, index) => (
                 <span 
                   key={index} 
-                  style={{ animationDelay: `${0.8 + index * 0.02}s` }}
+                  style={{ animationDelay: `${0.7 + index * 0.02}s` }}
                   className="letter-span-sub"
                 >
                   {char === ' ' ? '\u00A0' : char}
@@ -333,28 +425,11 @@ export default function LandingPage({ onGetStarted }) {
               ))}
             </p>
           </div>
-
-          {/* Scene 5: Floating glass cards appearing in radial pulse */}
-          <div className={`cinematic-glass-cards-grid ${stage === 'logoGlow' ? 'visible' : ''}`}>
-            {glassCards.map((card, idx) => (
-              <div 
-                key={idx}
-                className={`glass-metric-card ${activeCardIndex >= idx ? 'revealed' : ''}`}
-                style={{ '--delay': `${card.delay}ms` }}
-              >
-                <div className="glass-card-inner">
-                  <span className="glass-card-check">✓</span>
-                  <span>{card.text.replace('✓ ', '')}</span>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
-      {/* ── MAIN PREMIUM LANDING DASHBOARD (Scene 6) ── */}
+      {/* ── STAGE 8: MAIN PREMIUM LANDING PAGE (Seamless assembly transition) ── */}
       <div className={`landing-layout ${stage === 'landing' ? 'visible' : ''}`}>
-        
         {/* Header */}
         <header className="landing-header">
           <div className="landing-brand">
@@ -412,7 +487,7 @@ export default function LandingPage({ onGetStarted }) {
             </div>
           </div>
 
-          {/* Right Column: Interactive Dashboard Mockup */}
+          {/* Right Column: Premium Dashboard illustration */}
           <div className="hero-ill-col">
             <div className="dashboard-mockup">
               <div className="mock-header">
@@ -445,7 +520,7 @@ export default function LandingPage({ onGetStarted }) {
                     </div>
                   </div>
 
-                  {/* Floating Glassmorphic Cards (The core visual hook) */}
+                  {/* Floating Glassmorphic Cards */}
                   <div className="floating-cards-grid">
                     <div className="floating-card fc-window">
                       <div className="fc-icon">📅</div>
