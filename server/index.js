@@ -82,16 +82,6 @@ mongoose
 
     // Run embeddings migration to populate vector data
     await migrateEmbeddings();
-
-    // Pre-load embedding pipeline on startup to avoid first-query timeouts
-    const { getEmbedding } = require('./utils/embeddings');
-    try {
-      console.log('🧠 Pre-loading semantic embedding pipeline...');
-      await getEmbedding('warmup');
-      console.log('🧠 Embedding pipeline loaded and ready!');
-    } catch (embedLoadErr) {
-      console.warn('⚠️ Warning: Embedding pipeline pre-loading failed:', embedLoadErr.message);
-    }
     
     app.listen(PORT, () => {
       console.log(`🚀 ReturnRight AI server running on http://localhost:${PORT}`);

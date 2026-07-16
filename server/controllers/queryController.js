@@ -9,39 +9,7 @@ const { getEmbedding } = require('../utils/embeddings');
  * with a local keyword matcher as a fallback if the API is slow or offline.
  */
 async function classifyQueryCategory(question) {
-  const categories = ["electronics", "clothing", "furniture", "grocery", "toys", "sports"];
-  try {
-    const response = await fetch("https://router.huggingface.co/hf-inference/models/facebook/bart-large-mnli", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.HF_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        inputs: question,
-        parameters: {
-          candidate_labels: [...categories, "general refund inquiry"]
-        }
-      })
-    });
-    
-    if (response.ok) {
-      const result = await response.json();
-      if (result && result.labels && result.scores && result.scores[0] > 0.45) {
-        const topLabel = result.labels[0];
-        if (categories.includes(topLabel)) {
-          console.log(`🤖 Hugging Face classified query as: "${topLabel}" (score: ${(result.scores[0] * 100).toFixed(1)}%)`);
-          return topLabel;
-        }
-      }
-    } else {
-      console.warn("Hugging Face classifier returned non-200 status. Falling back to keyword matching.");
-    }
-  } catch (err) {
-    console.error("Hugging Face classifier error:", err.message);
-  }
-
-  // Fallback: Keyword matching logic
+  // Use fast local keyword matching directly to avoid Hugging Face API latency/failures
   const q = question.toLowerCase();
   if (q.includes('electronic') || q.includes('computer') || q.includes('laptop') || q.includes('phone') || q.includes('tv') || q.includes('device') || q.includes('camera') || q.includes('headphone')) {
     return 'electronics';
@@ -111,17 +79,9 @@ async function handleQuery(req, res) {
       });
     });
 
-    // Fetch query vector embedding from Hugging Face Router
-    const queryEmbedding = await getEmbedding(question);
-
-    let topChunks;
-    if (queryEmbedding && queryEmbedding.length > 0) {
-      console.log(`🧠 Performing semantic vector search for query: "${question}"`);
-      topChunks = retrieveSemanticChunks(question, queryEmbedding, chunks, 3, activeCategory || null);
-    } else {
-      console.warn("⚠️ Falling back to sparse TF-IDF search due to missing query embedding");
-      topChunks = retrieveTopChunks(question, chunks, 3, activeCategory || null);
-    }
+    // Default directly to sparse TF-IDF search for 100% local, fast, and offline retrieval
+    console.log(`🔍 Performing local TF-IDF search for query: "${question}"`);
+    const topChunks = retrieveTopChunks(question, chunks, 3, activeCategory || null);
 
     // Add highlighted content to each chunk
     const enrichedChunks = topChunks.map((chunk) => ({
