@@ -13,7 +13,7 @@ export default function ChatPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [suggestedQuery, setSuggestedQuery] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const messagesEndRef = useRef(null);
   const [uploadKey, setUploadKey] = useState(0);
 
@@ -34,6 +34,31 @@ export default function ChatPage() {
   const handleEditPolicy = (cat) => {
     setEditingCategory(cat);
     setShowUpload(true);
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
+
+  const handleSelectCategory = (cat) => {
+    setSelectedCategory(cat);
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
+
+  const handleSuggestedQuery = (q) => {
+    setSuggestedQuery(q);
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
+
+  const handleUploadClick = () => {
+    setEditingCategory(null);
+    setShowUpload(true);
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
   };
 
   return (
@@ -43,15 +68,17 @@ export default function ChatPage() {
         <Sidebar
           key={uploadKey}
           selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-          onUploadClick={() => {
-            setEditingCategory(null);
-            setShowUpload(true);
-          }}
-          onSuggestedQuery={(q) => setSuggestedQuery(q)}
+          onSelectCategory={handleSelectCategory}
+          onUploadClick={handleUploadClick}
+          onSuggestedQuery={handleSuggestedQuery}
           onEditPolicy={handleEditPolicy}
         />
       </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div className="sidebar-mobile-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
 
       {/* Main Content */}
       <div className="main-content">

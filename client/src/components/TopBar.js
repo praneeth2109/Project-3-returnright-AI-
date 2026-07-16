@@ -1,11 +1,17 @@
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 
-export default function TopBar({ onClearChat, selectedCategory }) {
+export default function TopBar({ onClearChat, selectedCategory, onToggleSidebar }) {
   const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="topbar">
+      <button className="icon-btn sidebar-toggle" onClick={onToggleSidebar} title="Toggle menu">
+        <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+          <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+
       <div className="topbar-brand">
         <div className="brand-logo">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
