@@ -22,9 +22,14 @@ const corsOptions = {
     // Allow requests with no origin (e.g. curl, Postman, server-to-server)
     if (!origin) return callback(null, true);
 
+    // If not in production, allow all origins for easy development
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+
     const isAllowed = 
       allowedOrigins.includes(origin) ||
-      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+      /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(origin) ||
       origin.endsWith('.netlify.app');
 
     if (isAllowed) {
