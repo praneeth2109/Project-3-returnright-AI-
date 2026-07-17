@@ -76,6 +76,9 @@ Please answer the customer's question based strictly on the policy excerpts abov
       ? "z-ai/glm-5.2" 
       : ((process.env.HF_MODEL || '').trim() || "microsoft/FastContext-1.0-4B-SFT:featherless-ai");
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000); // 6-second timeout
+
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -93,9 +96,11 @@ Please answer the customer's question based strictly on the policy excerpts abov
           { role: "user", content: userPrompt }
         ],
         max_tokens: useNvidia ? 1024 : 512
-      })
+      }),
+      signal: controller.signal
     });
 
+    clearTimeout(timeoutId);
     const data = await response.json();
 
     if (!response.ok) {
