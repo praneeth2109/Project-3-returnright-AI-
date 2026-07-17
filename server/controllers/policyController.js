@@ -1,6 +1,6 @@
 const Policy = require('../models/Policy');
 const { computeTermFrequency } = require('../utils/retrieval');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const { getEmbedding } = require('../utils/embeddings');
 
 
@@ -70,7 +70,7 @@ async function createPolicy(req, res) {
       const text = `${section.heading} ${section.content}`;
       const embedding = await getEmbedding(text);
       processedSections.push({
-        id: section.id || `${category}_${uuidv4().slice(0, 8)}`,
+        id: section.id || `${category}_${crypto.randomUUID().slice(0, 8)}`,
         heading: section.heading,
         content: section.content,
         termFrequencies: computeTermFrequency(text),
@@ -79,7 +79,7 @@ async function createPolicy(req, res) {
     }
 
     const policy = await Policy.create({
-      id: `pol_${category.toLowerCase()}_${uuidv4().slice(0, 8)}`,
+      id: `pol_${category.toLowerCase()}_${crypto.randomUUID().slice(0, 8)}`,
       category: category.toLowerCase(),
       title,
       icon: icon || '📄',
@@ -148,7 +148,7 @@ async function updatePolicyByCategory(req, res) {
       const text = `${section.heading} ${section.content}`;
       const embedding = await getEmbedding(text);
       processedSections.push({
-        id: section.id || `${updatedCategory}_${uuidv4().slice(0, 8)}`,
+        id: section.id || `${updatedCategory}_${crypto.randomUUID().slice(0, 8)}`,
         heading: section.heading,
         content: section.content,
         termFrequencies: computeTermFrequency(text),

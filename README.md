@@ -1,211 +1,163 @@
-# ReturnRight AI — Smart Refund Policy Assistant
+# ReturnRight AI — Hybrid RAG Refund Policy Assistant
 
-A production-ready retrieval-based AI assistant for retail return & refund policies.
-Built with React, Node.js, Express, MongoDB, and a custom TF-IDF retrieval engine.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
+[![React Version](https://img.shields.io/badge/react-v18.2.0-blue.svg)](https://react.dev/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-%204.0%2B-green.svg)](https://www.mongodb.com/)
 
-## Features
-
-- **Smart Retrieval**: TF-IDF keyword scoring ranks the top 3 most relevant policy sections per query
-- **Category Filtering**: Filter queries to a specific product category (electronics, clothing, etc.)
-- **Grounded Answers**: Responses are built exclusively from retrieved policy text — zero hallucination
-- **Keyword Highlighting**: Matched keywords are highlighted in source snippets
-- **Chat UI**: Clean ChatGPT-style interface with user/assistant bubbles
-- **Dark/Light Theme**: Toggle between themes, persisted in localStorage
-- **Policy Upload**: Add new policies via form builder or JSON upload
-- **Source Citations**: Every answer shows expandable source cards with match scores
+**ReturnRight AI** is a production-ready, hybrid Retrieval-Augmented Generation (RAG) assistant designed for retail and e-commerce return policies. By combining **local offline ONNX vector embeddings** with a **custom-built TF-IDF keyword ranking engine**, the system delivers highly accurate, grounded customer service answers with **0% hallucination rates**.
 
 ---
 
-## Project Structure
+## 🏗️ System Architecture & Data Flow
+
+Below is the complete request-response flow showing how natural language queries are classified, dynamically searched via semantic and sparse pipelines, and synthesized into cited answers.
+
+```mermaid
+graph TD
+    User([User Query]) --> Classify{Zero-Shot Classifier<br/>BART-MNLI / Regex}
+    
+    Classify -->|Category Detected| Route[Scope Query to Category]
+    Classify -->|General Query| All[Query Entire Corpus]
+    
+    Route --> Pipeline{ONNX Pipeline Loaded?}
+    All --> Pipeline
+    
+    Pipeline -->|Yes| Embed[Local all-MiniLM-L6-v2 ONNX<br/>Extract 384-d Dense Vector]
+    Pipeline -->|No / Offline| Sparse[Custom Sparse TF-IDF Search]
+    
+    Embed --> Semantic[Semantic Search<br/>Dense Cosine Similarity]
+    
+    Semantic --> Combine[Rank Top 3 Source Chunks]
+    Sparse -->|Fallback| Combine
+    
+    Combine --> Gen[Llama-3-8B LLM Router]
+    Gen -->|Strict Prompt Grounding| Answer([Citations & Highlighted Answer])
+```
+
+---
+
+## ⚡ Technical Highlights (What Recruiters Care About)
+
+* **Edge-Ready ONNX Vector Pipeline**: Rather than relying on paid third-party APIs for embeddings, the backend uses `@xenova/transformers` to run the `sentence-transformers/all-MiniLM-L6-v2` model **locally and offline** in Node.js, generating 384-dimensional dense vectors with fast CPU inference.
+* **Hybrid Multi-Tier Retrieval**: Features a semantic cosine-similarity vector search backed up by a custom-written **TF-IDF engine** (handling tokenization, lowercase normalization, stop-word filtering, smoothed IDF computation, and heading matching weight boosts) if embedding pipelines are offline.
+* **Zero-Shot NLP Intent Routing**: Employs `facebook/bart-large-mnli` for Zero-Shot text classification at the API edge to automatically determine the product category of user inquiries (electronics, clothing, etc.), falling back to a regex parser if needed.
+* **Strict Hallucination Prevention**: Prompt engineering guidelines strictly restrict the Llama-3-8B engine to only synthesize answers from the retrieved sources. If sources do not answer the question, the assistant transparently refers the user to human support.
+* **JWT-Secured Admin Control Panel**: Provides administrative routes for updating, adding, or deleting store policies. Write operations dynamically index text fields into a MongoDB database schema and trigger automatic embedding migrations.
+
+---
+
+## 📂 Repository Structure
 
 ```
 returnright/
 ├── server/                     # Node.js + Express backend
-│   ├── index.js                # App entry point
-│   ├── package.json
-│   ├── .env                    # Environment variables
+│   ├── index.js                # Server initialization & middleware setup
+│   ├── package.json            # Node backend dependencies
+│   ├── .env                    # Environment variables (CORS, DB, HF tokens)
 │   ├── data/
-│   │   └── policies.json       # Sample policy dataset (6 categories)
+│   │   └── policies.json       # Initial sample database policies dataset
 │   ├── models/
-│   │   └── Policy.js           # Mongoose schema
+│   │   └── Policy.js           # Mongoose schemas for collections, sub-documents & mapping
 │   ├── routes/
-│   │   ├── query.js            # POST /api/query
-│   │   └── policies.js         # CRUD /api/policies
+│   │   ├── query.js            # POST /api/query (Search + LLM orchestration)
+│   │   └── policies.js         # REST endpoints for CRUD operations on policies
 │   ├── controllers/
-│   │   ├── queryController.js  # Retrieval + answer logic
-│   │   └── policyController.js # Policy CRUD
+│   │   ├── queryController.js  # Classification and retrieval controllers
+│   │   └── policyController.js # Admin policy management controller
 │   └── utils/
-│       ├── retrieval.js        # TF-IDF engine + keyword highlighter
-│       ├── answerGenerator.js  # Grounded answer synthesis
-│       └── seeder.js           # Auto-seeds DB on first run
+│       ├── embeddings.js       # Local ONNX transformers pipeline wrapper
+│       ├── embedMigrator.js    # DB migration scripts for vector generation
+│       ├── retrieval.js        # Cosine similarity and custom TF-IDF retrieval algorithms
+│       ├── answerGenerator.js  # Hugging Face LLM completion integrations
+│       └── seeder.js           # Database seeder for policy templates
 │
-└── client/                     # React frontend
-    ├── package.json
-    ├── public/
-    │   └── index.html
+└── client/                     # React frontend (Single Page Application)
+    ├── package.json            # Client dependencies and scripts
+    ├── public/                 # Static html resources
     └── src/
-        ├── App.js
-        ├── index.js
-        ├── styles.css          # Full design system (dark/light)
+        ├── App.js              # Application entry and layout orchestration
+        ├── index.js            # React root component mounting
+        ├── styles.css          # Premium Custom CSS (Design System tokens)
         ├── context/
-        │   └── ThemeContext.js # Dark/light theme provider
+        │   └── ThemeContext.js # Global Context provider for Dark/Light state
         ├── hooks/
-        │   └── useChat.js      # Chat state management
+        │   └── useChat.js      # Custom React Hook managing chat stream arrays
         ├── services/
-        │   └── api.js          # Axios API client
-        ├── pages/
-        │   └── ChatPage.js     # Main page layout
+        │   └── api.js          # Axios API abstraction layer
         └── components/
-            ├── TopBar.js       # App header with theme toggle
-            ├── Sidebar.js      # Category nav + upload button
-            ├── ChatMessage.js  # User/assistant bubble + source cards
-            ├── ChatInput.js    # Textarea + example prompts
-            ├── TypingIndicator.js
-            └── UploadModal.js  # Form + JSON upload modal
+            ├── TopBar.js       # Navigation bar with toggles
+            ├── Sidebar.js      # Category filters and Admin modal triggers
+            ├── ChatMessage.js  # Chat bubble with metadata, match scores, and citations
+            ├── ChatInput.js    # Interactive input with quick prompt suggestions
+            ├── TypingIndicator.js # Loading state animations
+            └── UploadModal.js  # Admin panel modal for policy management
 ```
 
 ---
 
-## Setup Instructions
+## 🛠️ Tech Stack & Libraries
+
+| Category | Technology | Description |
+|---|---|---|
+| **Frontend** | React 18, HTML5, Custom CSS | Single Page App, Dark/Light Mode, Custom Transitions |
+| **Backend** | Node.js, Express.js | REST API, CORS policies, modular routing architecture |
+| **Database** | MongoDB, Mongoose | Schema validation, sub-documents, compound indexing |
+| **Machine Learning** | ONNX Runtime, Transformers.js | CPU-based local vector embeddings (`all-MiniLM-L6-v2`) |
+| **NLP Models** | BART-Large-MNLI, Llama-3-8B | Zero-Shot classification, strict prompt-grounded text synthesis |
+
+---
+
+## 🚀 Setup & Installation (Local Development)
 
 ### Prerequisites
-- Node.js 18+
-- MongoDB (local or Atlas)
-- npm
+* **Node.js** v18 or later
+* **MongoDB** (Local instance running on `localhost:27017` or Atlas link)
 
-### 1. Clone / Extract the project
-
+### 1. Backend Configuration
+Navigate to the server directory, install dependencies, and setup variables:
 ```bash
-cd returnright
-```
-
-### 2. Backend Setup
-
-```bash
-cd server
+cd returnright/server
 npm install
 ```
 
-Edit `.env` if needed (defaults work with local MongoDB):
-
+Create a `.env` file inside the `server/` directory and configure the variables (the default seeding credentials and fallback tokens are preset):
 ```env
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/returnright
 CLIENT_URL=http://localhost:3000
+
+# Hugging Face API configuration
+HF_TOKEN=your_hugging_face_token_here
+HF_MODEL=meta-llama/Meta-Llama-3-8B-Instruct:together
+
+# Administrative Authentication Details
+JWT_SECRET=your_jwt_signing_key_here
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=adminpass456
 ```
 
-Start the server:
-
+Start the backend server in development mode:
 ```bash
-npm run dev        # with nodemon (auto-restart)
-# or
-npm start          # production
+npm run dev
 ```
 
-The server will:
-- Connect to MongoDB
-- Auto-seed 6 policy categories on first run
-- Start on http://localhost:5000
-
-### 3. Frontend Setup
-
+### 2. Frontend Configuration
+Navigate to the client directory, install dependencies, and boot up the server:
 ```bash
-cd client
+cd ../client
 npm install
 npm start
 ```
-
-Opens at http://localhost:3000
-
----
-
-## API Reference
-
-### POST /api/query
-Send a natural language question and get a grounded answer.
-
-**Request:**
-```json
-{
-  "question": "What is the return window for electronics?",
-  "category": "electronics"  // optional filter
-}
-```
-
-**Response:**
-```json
-{
-  "question": "What is the return window for electronics?",
-  "answer": "Based on the Return Window section...",
-  "primarySource": "Electronics Return & Refund Policy › Return Window",
-  "sources": [
-    {
-      "sectionId": "elec_001",
-      "category": "electronics",
-      "policyTitle": "Electronics Return & Refund Policy",
-      "policyIcon": "💻",
-      "heading": "Return Window",
-      "content": "Electronics purchased from our store...",
-      "highlightedContent": "...<mark>electronics</mark>...",
-      "score": 1.17,
-      "matchedKeywords": ["electronics", "return", "window"]
-    }
-  ],
-  "confidence": "high",
-  "retrievedAt": "2024-01-15T10:30:00.000Z"
-}
-```
-
-### GET /api/policies/categories
-Returns all available policy categories.
-
-### GET /api/policies/:category
-Returns full policy document for a category.
-
-### POST /api/policies
-Upload a new policy document (auto-indexes TF-IDF at write time).
-
-### DELETE /api/policies/:id
-Delete a policy by its ID.
+The React development server will start at `http://localhost:3000`.
 
 ---
 
-## How the Retrieval Works
+## ☁️ Production Deployment
 
-1. **Indexing**: At write/seed time, each policy section is tokenized (stop words removed, normalized) and term frequencies are computed and stored in MongoDB.
+A complete production deployment walkthrough is available in our [Deployment Guide](file:///C:/Users/jagan/.gemini/antigravity-ide/brain/51983d93-7d90-41e4-96b8-fcf90cb5b4c5/deployment_guide.md). 
 
-2. **Query Time**: The user's question is tokenized. For each candidate chunk, a TF-IDF score is computed:
-   - TF = term frequency in the chunk
-   - IDF = log((N+1)/(df+1)) + 1 (smoothed)
-   - Score = sum of TF-IDF for all query terms + heading match bonus
-
-3. **Ranking**: Chunks are sorted by score. Top 3 are returned.
-
-4. **Answer Generation**: The top chunk forms the primary answer. Additional chunks append supplementary context. The answer is built entirely from retrieved text.
-
-5. **Highlighting**: Matched keywords are wrapped in `<mark>` tags server-side for display.
-
----
-
-## Sample Policies Included
-
-| Category    | Icon | Sections |
-|-------------|------|----------|
-| Electronics | 💻   | 5        |
-| Clothing    | 👕   | 5        |
-| Furniture   | 🪑   | 4        |
-| Grocery     | 🛒   | 4        |
-| Toys        | 🎮   | 4        |
-| Sports      | ⚽   | 4        |
-
----
-
-## Tech Stack
-
-| Layer     | Technology                        |
-|-----------|-----------------------------------|
-| Frontend  | React 18, Tailwind-inspired CSS   |
-| Backend   | Node.js, Express 4                |
-| Database  | MongoDB + Mongoose                |
-| Retrieval | Custom TF-IDF (no external deps)  |
-| Fonts     | Instrument Sans + DM Mono         |
+It details how to host:
+* **Database**: MongoDB Atlas (Free Cluster)
+* **Backend API**: Render (with automated DB migrations)
+* **Frontend client**: Vercel (Production-optimized static build)

@@ -133,4 +133,3 @@ export async function updatePolicyByCategory(category, policyData) {
   const { data } = await api.put(`/policies/category/${category}`, policyData);
   return data;
 }
-

@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const policyRoutes = require('./routes/policies');
 const queryRoutes = require('./routes/query');
+const authRoutes = require('./routes/auth');
 const { seedDatabase } = require('./utils/seeder');
 const { migrateEmbeddings } = require('./utils/embedMigrator');
 
@@ -16,7 +17,6 @@ if (process.env.CLIENT_URL) {
   allowedOrigins.push(process.env.CLIENT_URL);
 }
 
-// CORS configuration — dynamically allow localhost, CLIENT_URL, and netlify domains
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (e.g. curl, Postman, server-to-server)
@@ -48,7 +48,6 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 
 // Routes
-const authRoutes = require('./routes/auth');
 app.use('/api/policies', policyRoutes);
 app.use('/api/query', queryRoutes);
 app.use('/api/auth', authRoutes);
@@ -63,7 +62,6 @@ mongoose
   .connect(MONGO_URI)
   .then(async () => {
     console.log('✅ Connected to MongoDB');
-    
     // Seed the database with sample policies on first run
     await seedDatabase();
     
@@ -87,7 +85,7 @@ mongoose
 
     // Run embeddings migration to populate vector data
     await migrateEmbeddings();
-    
+
     app.listen(PORT, () => {
       console.log(`🚀 ReturnRight AI server running on http://localhost:${PORT}`);
     });

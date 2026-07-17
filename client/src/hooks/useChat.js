@@ -6,15 +6,7 @@ import { sendQuery } from '../services/api';
  * Manages all chat conversation state, including messages, loading, and errors.
  */
 export function useChat() {
-  const [messages, setMessages] = useState([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      text: "Hello! I'm **ReturnRight AI**, your smart return & refund policy assistant. Ask me anything about our return windows, refund timelines, eligible items, or exceptions — and I'll find the exact policy section for you.",
-      sources: [],
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -76,15 +68,7 @@ export function useChat() {
   }, [messages]);
 
   const clearChat = useCallback(() => {
-    setMessages([
-      {
-        id: 'welcome',
-        role: 'assistant',
-        text: "Hello! I'm **ReturnRight AI**, your smart return & refund policy assistant. Ask me anything about our return windows, refund timelines, eligible items, or exceptions — and I'll find the exact policy section for you.",
-        sources: [],
-        timestamp: new Date(),
-      },
-    ]);
+    setMessages([]);
     setError(null);
   }, []);
 

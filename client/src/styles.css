@@ -2428,6 +2428,13 @@ body,
   height: 100vh;
   z-index: 1;
   background: black;
+  transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+}
+
+.cinematic-canvas.stage-landing {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 .cinematic-grid-overlay {

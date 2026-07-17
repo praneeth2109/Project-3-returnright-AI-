@@ -1,17 +1,14 @@
 /**
- * Answer Generator — Hugging Face API Edition
+ * Answer Generator — Hugging Face & NVIDIA API Edition
  *
- * Uses the Hugging Face Inference API to synthesize a natural, accurate answer
- * from retrieved policy chunks. The model is strictly instructed to
+ * Uses the NVIDIA NIM API or Hugging Face Inference API to synthesize a natural, 
+ * accurate answer from retrieved policy chunks. The model is strictly instructed to
  * answer ONLY from the provided context — zero hallucination.
  */
 
-// Using native fetch for Hugging Face API
-// Node 18+ includes native fetch
-
 /**
- * Build the policy context block to inject into Claude's prompt.
- * Each chunk is clearly labeled with its source so Claude can cite it.
+ * Build the policy context block to inject into the prompt.
+ * Each chunk is clearly labeled with its source so the model can cite it.
  */
 function buildContextBlock(chunks) {
   return chunks
@@ -23,7 +20,7 @@ function buildContextBlock(chunks) {
 }
 
 /**
- * Generate a grounded, Hugging Face-powered answer from retrieved policy chunks.
+ * Generate a grounded, LLM-powered answer from retrieved policy chunks.
  *
  * @param {string} query  - The user's natural language question
  * @param {Array}  chunks - Top-ranked policy chunks from retrieval
@@ -122,27 +119,27 @@ Please answer the customer's question based strictly on the policy excerpts abov
         matchedKeywords: chunk.matchedKeywords,
       })),
       confidence,
-      model: data.model,
+      model: data.model || model,
       inputTokens: data.usage?.prompt_tokens,
       outputTokens: data.usage?.completion_tokens,
     };
   } catch (err) {
-    console.error('Hugging Face API error:', err.message);
+    console.error('API error:', err.message);
 
-    // Graceful fallback: return the top chunk content directly if HF fails
+    // Graceful fallback: return the top chunk content directly if API fails
     return {
-      answer: `Based on our **${chunks[0].heading}** policy:\n\n${chunks[0].content}`,
+      answer: `Based on our **${chunks[0].policyTitle}**:\n\n${chunks[0].content}`,
       primarySource,
-      sources: chunks.map((c) => ({
-        sectionId: c.sectionId,
-        category: c.category,
-        policyTitle: c.policyTitle,
-        policyIcon: c.policyIcon,
-        heading: c.heading,
-        content: c.content,
-        highlightedContent: c.highlightedContent,
-        score: c.score,
-        matchedKeywords: c.matchedKeywords,
+      sources: chunks.map((chunk) => ({
+        sectionId: chunk.sectionId,
+        category: chunk.category,
+        policyTitle: chunk.policyTitle,
+        policyIcon: chunk.policyIcon,
+        heading: chunk.heading,
+        content: chunk.content,
+        highlightedContent: chunk.highlightedContent,
+        score: chunk.score,
+        matchedKeywords: chunk.matchedKeywords,
       })),
       confidence,
       model: 'fallback',
@@ -151,4 +148,6 @@ Please answer the customer's question based strictly on the policy excerpts abov
   }
 }
 
-module.exports = { generateAnswer };
+module.exports = {
+  generateAnswer,
+};
